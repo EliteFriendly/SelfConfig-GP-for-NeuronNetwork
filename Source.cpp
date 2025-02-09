@@ -1,10 +1,10 @@
 #include <iostream>
 #include <vector>
-#include "MutationGP.h"
+
 #include "Tree.h"
-#include "CrossoverGP.h"
+
 #include <fstream>
-#include "AdaptiveGeneticProgramming.h"
+
 #include <time.h>
 #include <fstream>
 using namespace std;
@@ -94,105 +94,16 @@ double addNoise(double x, int power) {
 	}
 }
 
-void qsortRecursive(int* mas, int size) {
-	// Указатели в начало и в конец массива
-	int i = 0;
-	int j = size - 1;
-	// Центральный элемент массива
-	int mid = mas[size / 2];
-	// Делим массив
-	do {
-		// Пробегаем элементы, ищем те, которые нужно перекинуть в другую часть
-		// В левой части массива пропускаем (оставляем на месте) элементы, которые меньше центрального
-		while (mas[i] < mid) {
-			i++;
-		}
-		// В правой части пропускаем элементы, которые больше центрального
-		while (mas[j] > mid) {
-			j--;
-		}
-		// Меняем элементы местами
-		if (i <= j) {
-			int tmp = mas[i];
-			mas[i] = mas[j];
-			mas[j] = tmp;
-			i++;
-			j--;
-		}
-	} while (i <= j);
-	// Рекурсивные вызовы, если осталось, что сортировать
-	if (j > 0) {
-		qsortRecursive(mas, j + 1);
-	}
-	if (i < size) {
-		qsortRecursive(&mas[i], size - i);
-	}
-}
-
-
-
-void doResearch(int number, int filename) {
-
-	setlocale(0, "");
-	int str = 200;
-	int col = 2;
-
-	ifstream file("Num_"+to_string(number)+".txt");
-
-
-	double** data = new double* [str];
-	double tmp;
-
-	for (int i = 0; i < str; i++) {
-		data[i] = new double[col];
-		for (int j = 0; j < col; j++) {
-			file >> data[i][j];
-		}
-		file >> tmp;
-	}
-	ofstream out("Points/Out_"+to_string(number) + to_string(filename) + ".txt");
-
-	
-
-	AdaptiveGeneticProgramming proba(1, 3);
-	proba.numFile(filename+number*10);
-	proba.startTrain(data, col, str, 20, 20);
-
-
-	ofstream res("Results/Input_" + to_string(number) + to_string(filename) + ".txt");
-
-	res << proba.getBest().getFunc()<<endl;
-	res << proba.getBest().getFitness() << endl;;
-
-	for (int i = 0; i < str; i++) {
-		for (int j = 0; j < col; j++) {
-			out << data[i][j]<<'\t';
-		}
-		out << proba.getBest().getLabel()[i];
-		out << endl;
-	}
-
-	out.close();
-	res.close();
-
-
-	for (int i = 0; i < str; i++)
-		delete[] data[i];
-
-	delete[] data;
-
-}
 
 
 
 
 void main() {
-
-	for (int i = 0; i < 5; i++) {
-		cout << "Number = " << i<<endl;
-		doResearch(3, i);
-	}
-
+	srand(5);
+	Tree proba(2, 2);
+	proba.doNeuronNetwork();
+	cout << proba.getFunc() << endl;
+	cout<<proba.getMatrix();
 
 
 	

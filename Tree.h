@@ -3,11 +3,11 @@
 #include <vector>
 #include <iostream>
 #include "Diff_evolution/DiffEvolution.h"
-
+#include "Neuron.h"
 
 /*
 Заходя суда помни!
-номер слойя по x
+номер слоя по x
 количество нейронов по y
 +------------------------------------>x
 | [0;0] [1;0] [2;0] [3;0] [4;0] [5;0]
@@ -43,12 +43,12 @@ private:
 
 	double fitness=-9999999;//Ну тут понятно
 
-	bool lastVertice;//Последняя вершина
-	bool inputBranch;//Ветвь входа
+	bool lastVertice;//Последняя ли вершина
+	bool inputBranch;//Является ли узел ветвью входа
 	bool mainNode;//Начальный ли узел
 
 	int* ammNeuron = nullptr;//Количество узлов в слое
-	int ammLayers;
+	int ammLayers = 0;//Количество слоев
 	Neuron** network = nullptr;
 
 	Tree* left = nullptr;
@@ -57,53 +57,69 @@ private:
 
 	vector<string> strBinaryFunc = { "+",">" };//Символьный вывод функции
 
-	vector<function <Tree* (Tree*, Tree*)>> binaryFunc = {
-		[](Tree* x,Tree* y) {return x + y; },
-		[](Tree* x,Tree* y) {return x > y; }
-	};//Выборка из бинарных функций
-
-	Tree(int d, int numInput, bool inputBranch):inputBranch(inputBranch) {
-		ammInputs = numInput;
-		//Случай если дошли до самого конца
-		if (d == 0) {
-			lastVertice = true;
-			if (rand() % (numInput + 1)) {
-				numInput = rand() % numInput;
-				numVertices = 0;
-			}
-			else {
-				numVertices = 1;
-				coef = 1;
-			}
-			return;
-		}
-		int r = rand() % 2;
-	}
+	int amFuncActive = 16;
+	function <double(double)> funcActivation[16] = {
+		[](double x) { return 0; } ,//1
+		[](double x) {return sin(x); },//2
+		[](double x) {if (x < -1) return -1.0; if (x > 1) return 1.0; else return x; },//3
+		[](double x) {return 2 / (1 + exp(x)) - 1; },//4
+		//5 пропущена
+		[](double x) {return exp(x); },//6
+		[](double x) {return abs(x); },//7
+		[](double x) {return 1 - exp(x); },//8
+		[](double x) {return x; },//9
+		[](double x) {return pow(x,2); },//10
+		[](double x) {return pow(x,3); },//11
+		[](double x) { if (x == 0) return 0.0; return pow(x,-1); },//12
+		[](double x) {return 1; },//13
+		[](double x) {return 1 / (1 + exp(-x)); },//14
+		[](double x) {return exp(-(x * x) / 2); },//15
+		[](double x) {if (x < -1 / 2) return -1.0; if (x > 1 / 2) return 1.0; else return x + 1 / 2; }//16
+	};
 
 
+	Tree(int d, int ammInput, bool inputBranch);
 
 
 public:
 	Tree() {}
-	Tree(const Tree &copy) :numberFunc(copy.numberFunc), lastVertice(copy.lastVertice),
-		unarFuncUs(copy.unarFuncUs), coef(copy.coef),numVertices(copy.numVertices),numNodes(copy.numNodes),fitness(copy.fitness),
-		layerLevel(copy.layerLevel), numInput(copy.numInput), ammInputs(copy.ammInputs), numCluster(copy.numCluster)
+	Tree(const Tree &copy) 
 	{
+		this->~Tree();
+		ammLayers = copy.ammLayers;
+		mainNode = copy.mainNode;
+		inputBranch = copy.inputBranch;
+		size = copy.size;
+		numberFunc = copy.numberFunc;
+		layerLevel = copy.layerLevel;
+		lastVertice = copy.lastVertice;
+		numInput = copy.numInput;
+		numVertices = copy.numVertices;
+		numNodes = copy.numNodes;
+		fitness = copy.fitness;
+		ammInputs = copy.ammInputs;
 
-		if (copy.label != nullptr) {
-			if (label != nullptr) {
-				delete[] label;
-				label = nullptr;
-			}
-			label = new int[copy.size];
-			size = copy.size;
-			for (int i = 0; i < size; i++) {
-				label[i] = copy.label[i];
-			}
+		if (ammNeuron != nullptr) {
+			delete[] ammNeuron;
 		}
 
-		/*this->operator=(copy);
-		cout << 1;*/
+		if (copy.ammNeuron != nullptr) {
+			ammNeuron = new int[ammLayers];
+			for (int i = 0; i < ammLayers; i++) {
+				ammNeuron[i] = copy.ammNeuron[i];
+			}
+		}
+		if (copy.network != nullptr) {
+			network = new Neuron * [ammLayers];
+			for (int i = 0; i < ammLayers; i++) {
+				network[i] = new Neuron[ammNeuron[i]];
+				for (int j = 0; j < ammNeuron[i]; j++) {
+					network[i][j] = copy.network[i][j];
+				}
+			}
+		}
+		
+
 		//Выделение памяти чтобы не было кучи взаимосвязанных индивидлв
 		if (copy.left != nullptr) {
 			if (left != nullptr) {
@@ -134,12 +150,16 @@ public:
 		
 	}
 	void calcFitness(double** x, int size,double K1);
+
+	string getMatrix();
+
 	double getFitness() {
 		return fitness;
 	}
 	Tree(int d,int numInputs);
 	string getFunc();
 
+	void doNeuronNetwork();
 
 	bool getLastVertice() {
 		return lastVertice;
@@ -162,9 +182,18 @@ public:
 		return ammInputs;
 	}
 	~Tree() {
-		if (label != nullptr) {
-			delete[] label;
-			label = nullptr;
+		if (network != nullptr) {
+			if (!lastVertice) {
+				for (int i = 0; i < ammLayers; i++) {
+					delete[] network[i];
+				}
+			}
+			delete[]network;
+			network = nullptr;
+		}
+		if (ammNeuron != nullptr) {
+			delete[] ammNeuron;
+			ammNeuron = nullptr;
 		}
 		if (left != nullptr) {
 			delete left;
@@ -185,21 +214,19 @@ public:
 
 	void randFunc() {//Используется для оператора мутации
 		if (lastVertice) {
-			int r = rand() % (ammInputs + 1);//Считается с коэф
-			if (r == 0) {
-				numVertices = 1;
+			if (inputBranch) {
+				numInput = rand() % ammInputs;
 			}
 			else {
-				numVertices = 0;
-				numInput = rand() % ammInputs;
+				numberFunc = rand() % amFuncActive;
 			}
 		}
 		else {
-			if (unarFuncUs) {
-				numberFunc = rand() % unarFunc.size();
+			if (inputBranch) {
+				numberFunc = 0;
 			}
 			else {
-				numberFunc = rand() % binaryFunc.size();
+				numberFunc = rand() % 2;
 			}
 		}
 	}
@@ -221,28 +248,13 @@ public:
 
 	Tree operator =(const Tree& copy) {
 
-		if (copy.label != nullptr) {
-			if (label != nullptr) {
-				delete[] label;
-				label = nullptr;
-			}
-			label = new int[copy.size];
-			size = copy.size;
-			for (int i = 0; i < size; i++) {
-				label[i] = copy.label[i];
-			}
-			
-		}
 
 
 
-		numCluster = copy.numCluster;
 
 		numberFunc = copy.numberFunc;
 		layerLevel = copy.layerLevel;
 		lastVertice = copy.lastVertice; 
-		unarFuncUs = copy.unarFuncUs;
-		coef = copy.coef;
 		numInput = copy.numInput;
 		numVertices = copy.numVertices;
 		numNodes = copy.numNodes;
@@ -279,5 +291,6 @@ public:
 		}
 		return *this;
 	}
+	
 };
 

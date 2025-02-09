@@ -127,18 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AdaptiveGeneticProgramming.h" />
-    <ClInclude Include="CrossoverGP.h" />
     <ClInclude Include="Diff_evolution\DiffEvolution.h" />
     <ClInclude Include="Diff_evolution\DiffMutation.h" />
     <ClInclude Include="Diff_evolution\IndividualDiffEvolution.h" />
-    <ClInclude Include="FormingGP.h" />
-    <ClInclude Include="MutationGP.h" />
     <ClInclude Include="Neuron.h" />
     <ClInclude Include="Tree.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AdaptiveGeneticProgramming.cpp" />
     <ClCompile Include="Diff_evolution\DiffEvolution.cpp" />
     <ClCompile Include="Diff_evolution\DiffMutation.cpp" />
     <ClCompile Include="Diff_evolution\IndividualDiffEvolution.cpp" />

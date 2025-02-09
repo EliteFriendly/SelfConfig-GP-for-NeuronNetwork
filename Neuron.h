@@ -1,58 +1,113 @@
 #pragma once
+#include <iostream>
+#include <sstream>
+
+using namespace std;
 class Neuron
 {
 	//Здесь находятся связи с узлами относительно нейрона
-	int** input = nullptr;
-	bool ouput = false;
-
-	int ammInputs = 0;
-
+	int** input = nullptr;//Координаты входящих узлов
+	bool output = false;//Есть ли выходные узлы
+	int amountInp = 0;//Только количество входов
 	
-	int useFunc;
+	int useFunc;//Номер используемой функции, или входа(от 0)
+	bool inputBranch = false;//Находится ли в ветви входа
 
-	void addInput(int xInput, int yInput) {
-		if (input == nullptr) {
-			//Создание с нуля если еще ничего не было
-			input = new int* [1];
-			ammInputs++;
-			input[0] = new int[2];
-			input[0][0] = xInput;
-			input[0][1] = yInput;
-			return;
-		}
-		
-		int** tmp = new int*[ammInputs];
-		tmp = input;
-		//Копирование с одновременной чисткой
-		for (int i = 0; i < ammInputs; i++) {
-			tmp[i][0] = input[i][0];
-			tmp[i][1] = input[i][1];
-			delete[] input[i];
-		}
-		delete[]input;
-		ammInputs++;
-		input = new int* [ammInputs];
-		//Копирование в увеличенный массив
-		for (int i = 0; i < ammInputs - 1; i++) {
-			input[i] = new int[2];
-			input[i][0] = tmp[i][0];
-			input[i][1] = tmp[i][1];
-			delete[] tmp[i];
-		}
-		delete[] tmp;
-		input[ammInputs - 1][0] = xInput;
-		input[ammInputs - 1][1] = yInput;
-
-
-	}
 
 public:
+	Neuron() {};
+	Neuron(const Neuron& copy) {
+		output = copy.output;
+		amountInp = copy.amountInp;
+		useFunc = copy.useFunc;
+		inputBranch = copy.inputBranch;
+		if (copy.input != nullptr) {
+			input = new int* [amountInp];
+			for (int i = 0; i < amountInp; i++) {
+				input[i] = new int[2];
+				input[i][0] = copy.input[i][0];
+				input[i][1] = copy.input[i][1];
+			}
+		}
+
+	}
+	Neuron(bool inputBranch, int numberInput):inputBranch(inputBranch),useFunc(numberInput) {
+		input = new int*[0];
+		output = false;
+	}
 	Neuron(int useFunc):useFunc(useFunc){};
 	
-	void connectTo(Neuron& second,int* xOutput, int* yOutput)//Вводить х и у те, куда идет подключение
+	void connect(int amount,int* xOutputs, int* yOutputs, int x, int y)//Вводить х и у те, относительно коннекчущего узла
 	{
-		
+		if (input == nullptr) {//РАссмотрен случай когда справа ТОЧНО не окажется входящих узлов
+			input = new int* [amount];
+			Neuron::amountInp = amount;
+			for (int i = 0; i < amount; i++) {
+				input[i] = new int[2];
+				input[i][0] = xOutputs[i] - x;
+				input[i][1] = yOutputs[i] - y;
+			}
+		}
+		else {
+			cout << endl << "Ошибка коннекта";
+			exit(0);
+		}
 	}
-
+	string getStrCoord() {
+		stringstream ss;
+		if (input == nullptr) {
+			ss << " nullptr ";
+			return ss.str();
+		}
+		for (int i = 0; i < amountInp; i++) {
+			ss << "{ " << input[i][0] << " ; " << input[i][1] << " }";
+		}
+		return ss.str();
+	}
+	int** getCoord() {
+		return input;
+	}
+	bool getOutput() {
+		return output;
+	}
+	bool getInput() {
+		if (input == nullptr) {
+			return false;
+		}
+		return true;
+	}
+	void haveOutput() { output = true; }
+	~Neuron() {
+		if (input != nullptr) {
+			if (inputBranch) {
+			}
+			else {
+				if (amountInp != 0) {
+					for (int i = 0; i < amountInp; i++) {
+						delete[] input[i];
+					}
+				}
+				
+			}
+			delete[] input;
+			
+		}
+		input = nullptr;
+	}
+	Neuron operator = (const Neuron& copy) {
+		output = copy.output;
+		amountInp = copy.amountInp;
+		useFunc = copy.useFunc;
+		inputBranch = copy.inputBranch;
+		if (copy.input != nullptr) {
+			input = new int* [amountInp];
+			for (int i = 0; i < amountInp; i++) {
+				input[i] = new int[2];
+				input[i][0] = copy.input[i][0];
+				input[i][1] = copy.input[i][1];
+			}
+		}
+		return *this;
+	}
 };
 

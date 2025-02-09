@@ -31,78 +31,79 @@ void Tree::calcFitness(double** x, int size,double K1)
 {
 	double error = 0;
 
-	clustering(x, size);
-
-	int* sizeClust = new int[numCluster];
-	for (int i = 0; i < numCluster; i++) {
-		sizeClust[i] = 0;
-	}
-
-
-	for (int i = 0; i < size; i++) {
-		sizeClust[label[i] - 1]+=1;
-	}
-	if (sizeClust[0] <= 1 or sizeClust[1] <= 1) {
-		fitness = -999;
-		delete[] sizeClust;
-		return;
-	}
-
-
-	double a = distanceAverageIn(x, sizeClust, size, 1);
-	a += distanceAverageIn(x, sizeClust, size, 2);
-	a /= 2;
-	double b = distanceAverageOut(x, sizeClust, size);
-
-
-
-	fitness = (b-a)/(max(b,a));
+	fitness = 0;//???????
 	if (fitness == 0)
 		fitness += 0.00001;
 	if (fitness == NULL) {
 		cout << "Фитнес равен NAN";
 		exit(0);
 	}
-	delete[] sizeClust;
 }
+
+string Tree::getMatrix()
+{
+
+	stringstream ss;
+	
+	for (int i = 0; i < ammLayers; i++) {
+		for (int j = 0; j < ammNeuron[i]; j++) {
+			ss << "[" << network[i][j].getStrCoord() << "] ";
+		}
+		ss << endl;
+	}
+
+
+	return ss.str();
+}
+
+
+
+
+
+
+Tree::Tree(int d, int ammInput, bool inputBranch) :inputBranch(inputBranch), ammInputs(ammInput) {
+
+	//Случай если дошли до самого конца
+	if (d == 0) {
+		lastVertice = true;
+		ammNeuron = new int[1];
+		ammNeuron[0] = 1;
+		ammLayers++;
+		if (inputBranch) {
+			numInput = rand() % ammInputs;
+			network = new Neuron * [1];
+			network[0] = new Neuron(true, numInput);//?????????
+			return;
+		}
+		else {
+			numberFunc = rand() % amFuncActive;
+			network = new Neuron * [1];
+			network[0] = new Neuron(numberFunc);//?????????
+			return;
+		}
+	};
+	if (inputBranch) {
+		numberFunc = 0;
+		left = new Tree(d - 1, ammInput, true);
+		right = new Tree(d - 1, ammInput, true);
+	}
+	else {
+		numberFunc = rand() % 2;
+		left = new Tree(d - 1, ammInput, false);
+		right = new Tree(d - 1, ammInput, false);
+	};
+};
+
+
 
 Tree::Tree(int d, int numInputs)
 {
 	ammInputs = numInputs;
-	//Случай если дошли до самого конца
-	if (d == 0) {
-		lastVertice = true;
-		if (rand() % (numInputs+1)) {
-			numInput = rand() % numInputs;
-			numVertices = 0;
-		}
-		else {
-			numVertices = 1;
-			coef = 1;
-		}
-		return;
-	}
-	
-	int r = rand() % 2;
-	
-	
-	if (r) {
-		//В случае если унарная
-		unarFuncUs = true;
-		
-		numberFunc = rand() % (unarFunc.size());
-		//Tree a(d - 1);
-		right = new Tree(d-1,numInputs);
-	}
-	else {
-		//В случае если бинарная
-		unarFuncUs = false;
-		numberFunc = rand() % (binaryFunc.size());
-		//Tree l(d - 1);
-		//Tree r(d - 1);
-		left = new Tree(d - 1,numInputs);
-		right = new Tree(d - 1,numInputs);
-	}
+	mainNode = true;
+	//Так это основной узел, у него все определено левый и правый уже понятны
+	numberFunc = 1;
+	left = new Tree(d - 1, numInputs, true);
+	right = new Tree(d - 1, numInputs, false);
 }
 
 
@@ -110,11 +111,11 @@ string Tree::getFunc()
 {
 	stringstream ss;
 	if (lastVertice) {
-		if (numVertices == 1) {
-			ss << coef;
+		if (inputBranch) {
+			ss << 'I'<< numInput;
 		}
 		else {
-			ss <<'X' << numInput;
+			ss <<'N'<< numberFunc;
 		}
 
 	}
@@ -123,23 +124,11 @@ string Tree::getFunc()
 			ss << '(';
 			ss << left->getFunc();
 		}
-		if (unarFuncUs) {
-			if (numberFunc == 0 and !lastVertice) {
-				ss << '(';
-			}
-			else {
-				ss << strUnarFunc[numberFunc];
-				if (lastVertice == false) {
-					ss << '(';
-				}
-			}
+		
+		if (!lastVertice) {
+			ss << strBinaryFunc[numberFunc];
 		}
-		else {
-			if (!lastVertice) {
-				ss << strBinaryFunc[numberFunc];
-			}
-
-		}
+		
 		if (right != nullptr) {
 			ss << right->getFunc();
 			ss << ')';
@@ -148,6 +137,99 @@ string Tree::getFunc()
 	
 
 	return ss.str();
+}
+
+void Tree::doNeuronNetwork()
+{
+	if (lastVertice)
+		return;
+	left->doNeuronNetwork();
+	right->doNeuronNetwork();
+	if (numberFunc == 0) {//Случай сложения узлов
+		ammLayers = max(left->ammLayers, right->ammLayers);//Ищем максимальное количество слоев
+		int minLayers = min(left->ammLayers, right->ammLayers);
+		bool leftMax = false;//Ищем тот самый узел где больше всего слоев
+		if (ammLayers == left->ammLayers)
+			leftMax = true;
+		ammNeuron = new int[ammLayers];
+		for (int i = 0; i < minLayers; i++) {//Считаем сколько нейорнов будет в каждом слое
+			ammNeuron[i] = left->ammNeuron[i] + right->ammNeuron[i];
+		}
+		for (int i = minLayers; i < ammLayers; i++) {//Остаток, что был в большем
+			ammNeuron[i] = leftMax ? left->ammNeuron[i] : right->ammNeuron[i];
+		}
+		network = new Neuron * [ammLayers];
+		for (int i = 0; i < ammLayers; i++) {//Начинаем копировать нейроны
+			network[i] = new Neuron [ammNeuron[i]];
+			if (i < minLayers) {//Если происходит наслоение
+				for (int j = 0; j < ammNeuron[i]; j++) {
+					if (leftMax) {
+						if (j < left->ammNeuron[i])
+							network[i][j] = left->network[i][j];
+						else
+							network[i][j] = right->network[i][j - left->ammNeuron[i]];
+					}
+					else {
+						if (j < right->ammNeuron[i])
+							network[i][j] = right->network[i][j];
+						else
+							network[i][j] = left->network[i][j - right->ammNeuron[i]];
+					}
+				}
+			}
+			else {//Случай когда рассматриваем остаток
+				for (int j = 0; j < ammNeuron[i]; j++) {
+					if (leftMax) {
+						network[i][j] = left->network[i][j];
+					}
+					else {
+						network[i][j] = right->network[i][j];
+					}
+				}
+			}
+		}
+	}
+
+
+	if (numberFunc == 1) {//Случай если обьединение
+		int ammLeftN = 0;//Количество нейронов слева
+		ammLayers = left->ammLayers + right->ammLayers;
+		ammNeuron = new int[ammLayers];
+		for (int i = 0; i < left->ammLayers; i++) {
+			ammNeuron[i] = left->ammNeuron[i];
+			ammLeftN += ammNeuron[i];
+		}
+		for (int i = left->ammLayers; i < ammLayers; i++) {
+			ammNeuron[i] = right->ammNeuron[i - left->ammLayers];
+		}
+		network = new Neuron * [ammLayers];
+		int* coordXOutput = new int[ammLeftN];
+		int* coordYOutput = new int[ammLeftN];
+		int i1 = 0;//Количество нейронов где нет выхода
+		for (int i = 0; i < ammLayers; i++) {
+			network[i] = new Neuron[ammNeuron[i]];
+			if (i < left->ammLayers) {
+				for (int j = 0; j < ammNeuron[i]; j++) {
+					network[i][j] = left->network[i][j];
+					if (!network[i][j].getOutput()) {
+						coordXOutput[i1] = i;
+						coordYOutput[i1] = j;
+						i1++;
+						network[i][j].haveOutput();
+					}
+				}
+			}
+			else {
+				for (int j = 0; j < ammNeuron[i]; j++) {
+					network[i][j] = right->network[left->ammLayers-i][j];
+					if (!network[i][j].getInput()) {
+						network[i][j].connect(i1, coordXOutput, coordYOutput, i, j);
+					}
+				}
+			}
+		}
+		
+	}
 }
 
 void Tree::changeCoef(double *in,int &z)
@@ -160,7 +242,7 @@ void Tree::changeCoef(double *in,int &z)
 		right->changeCoef(in, z);
 	}
 	if (lastVertice and numVertices == 1) {
-		coef = in[z];//Замена коэффициентов в случае если все ок
+		//coef = in[z];//Замена коэффициентов в случае если все ок
 		z++;//Работа с памятью!!!
 	}
 }
@@ -194,26 +276,21 @@ double Tree::getValue(double* x)
 	//	return unarFunc[numberFunc](right->getValue(x));
 	//	
 	//}
-	if (lastVertice) {//Если дошли до вершины
-		if (numVertices==1) {
-			return coef;
-		}
-		if (numVertices==0) {
-			return x[numInput];
-		}
-		else {
-			cout << "Непредвиденность в getValue";
-			exit(0);
-		}
-	}
+	//if (lastVertice) {//Если дошли до вершины
+	//	if (numVertices==1) {
+	//		return coef;
+	//	}
+	//	if (numVertices==0) {
+	//		return x[numInput];
+	//	}
+	//	else {
+	//		cout << "Непредвиденность в getValue";
+	//		exit(0);
+	//	}
+	//}
 
-	if (unarFuncUs) {
-		return unarFunc[numberFunc](right->getValue(x));
-	}
-	else {//Если попались в бинарную функцию
-		return binaryFunc[numberFunc](left->getValue(x),right->getValue(x));
-	}
-	
+
+	return 0.0;
 }
 
 void Tree::replaceNode(int search, Tree& newNode)//Замена выбранного узла
@@ -233,56 +310,56 @@ void Tree::replaceNode(int search, Tree& newNode)//Замена выбранного узла
 
 void Tree::changeNode(int search, Tree& newNode)//Отличие от replace в том, что не меняются остальные узлы
 {
-	if (numNodes == search) {//Если мы дошли до узла под каким то номером
-		if (newNode.getLastVertice()) {
-			//*this = newNode;
-			if (newNode.getLastVertice() == lastVertice) {
-				*this = newNode;
-				return;
-			}
-			return;
-		}
-		if (lastVertice) {
-			int tnumnodes = numNodes;
-			*this = newNode;
-			numNodes = tnumnodes;
-		}
-		if (newNode.getUnar() == unarFuncUs) {
-			numberFunc = newNode.getNumFunc();
-		}
-		else {
-			if (newNode.getUnar()) {
-				unarFuncUs = true;
-				numberFunc = newNode.getNumFunc();
-				left->~Tree();
-				left = nullptr;
-			}
-			else {
-				unarFuncUs = false;
-				numberFunc = newNode.getNumFunc();
-				if (left != nullptr) {
-					delete left;
-				}
-				left = new Tree;
-				//left->operator=(*copy.left);
-				*left = Tree(*(newNode.left));
-				left->numNodes = -1;//Сделано для того, чтобы не было изменений в этой ветви
-			}
-		}
-		return;
-	}
+	//if (numNodes == search) {//Если мы дошли до узла под каким то номером
+	//	if (newNode.getLastVertice()) {
+	//		//*this = newNode;
+	//		if (newNode.getLastVertice() == lastVertice) {
+	//			*this = newNode;
+	//			return;
+	//		}
+	//		return;
+	//	}
+	//	if (lastVertice) {
+	//		int tnumnodes = numNodes;
+	//		*this = newNode;
+	//		numNodes = tnumnodes;
+	//	}
+	//	if (newNode.getUnar() == unarFuncUs) {
+	//		numberFunc = newNode.getNumFunc();
+	//	}
+	//	else {
+	//		if (newNode.getUnar()) {
+	//			unarFuncUs = true;
+	//			numberFunc = newNode.getNumFunc();
+	//			left->~Tree();
+	//			left = nullptr;
+	//		}
+	//		else {
+	//			unarFuncUs = false;
+	//			numberFunc = newNode.getNumFunc();
+	//			if (left != nullptr) {
+	//				delete left;
+	//			}
+	//			left = new Tree;
+	//			//left->operator=(*copy.left);
+	//			*left = Tree(*(newNode.left));
+	//			left->numNodes = -1;//Сделано для того, чтобы не было изменений в этой ветви
+	//		}
+	//	}
+	//	return;
+	//}
 
-	if (left != nullptr and search <= left->getNumNodes()) {
-		left->changeNode(search, newNode);
-	}
-	if (right != nullptr and search <= right->getNumNodes()) {
-		right->changeNode(search, newNode);
-	}
+	//if (left != nullptr and search <= left->getNumNodes()) {
+	//	left->changeNode(search, newNode);
+	//}
+	//if (right != nullptr and search <= right->getNumNodes()) {
+	//	right->changeNode(search, newNode);
+	//}
 }
 
 void Tree::trainWithDE(double** x, int size, double K1)
 {
-	if (label == nullptr) {
+	/*if (label == nullptr) {
 		label = new int[size];
 		Tree::size = size;
 	}
@@ -321,92 +398,12 @@ void Tree::trainWithDE(double** x, int size, double K1)
 	double* coef = DE.getBestCoordinates();
 	changeCoef(coef, i);
 	calcFitness(x, size, K1);
-
-
-
-}
-
-
-
-
-double Tree::distanceAverageIn(double** data, int* sizeClust, int str, int cluster) {
-
-	double sum = 0, dist = 0;
-
-	for (int i = 0; i < str; i++) {
-		for (int j = 0; j < str; j++) {
-			if (label[i] != label[j] or label[i] != cluster or i==j)
-				continue;
-			dist = 0;
-			for (int w = 0; w < ammInputs; w++) {
-
-				dist += pow(data[i][w] - data[j][w], 2);
-
-			}
-			dist = pow(dist, 0.5);
-			sum += dist;
-
-
-
-		}
-	}
-
-
-	sum = (sum / (sizeClust[cluster-1])) / (sizeClust[cluster - 1] - 1);
-
-	return sum;
-
-}
-double Tree::distanceAverageOut(double** data, int* sizeClust, int str) {
-
-	double sum = 0, dist = 0;
-
-
-	for (int i = 0; i < str; i++) {
-		for (int j = 0; j < str; j++) {
-			if (label[i] == label[j])
-				continue;
-
-			dist = 0;
-			for (int w = 0; w < ammInputs; w++) {
-
-				dist += pow(data[i][w] - data[j][w], 2);
-
-			}
-			dist = pow(dist, 0.5);
-			sum += dist;
-
-
-
-		}
-	}
-
-	for (int i = 0; i < numCluster; i++) {
-		sum /= sizeClust[i];
-	}
-
-	return sum;
-
-}
-
-void Tree::clustering(double** data, int str)
-{
-	
-	if (numCluster == 2) {
-
-		for (int i = 0; i < str; i++) {
-			if (getValue(data[i]) > 0) {
-				label[i] = 1;
-			}
-			else {
-				label[i] = 2;
-			}
-		}
-
-
-
-	}
-
+*/
 
 
 }
+
+
+
+
+
