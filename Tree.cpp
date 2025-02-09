@@ -49,7 +49,7 @@ string Tree::getMatrix()
 		for (int j = 0; j < ammNeuron[i]; j++) {
 			ss << "[" << network[i][j].getStrCoord() << "] ";
 		}
-		ss << endl;
+		ss << "End" << endl;
 	}
 
 
@@ -221,7 +221,7 @@ void Tree::doNeuronNetwork()
 			}
 			else {
 				for (int j = 0; j < ammNeuron[i]; j++) {
-					network[i][j] = right->network[left->ammLayers-i][j];
+					network[i][j] = right->network[i-left->ammLayers][j];
 					if (!network[i][j].getInput()) {
 						network[i][j].connect(i1, coordXOutput, coordYOutput, i, j);
 					}
