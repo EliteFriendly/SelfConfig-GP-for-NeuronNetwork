@@ -4,7 +4,7 @@
 #include "Tree.h"
 
 #include <fstream>
-
+#include "MutationGP.h"
 #include <time.h>
 #include <fstream>
 using namespace std;
@@ -90,11 +90,23 @@ double addNoise(double x, int power) {
 
 
 void main() {
-	srand(2);
-	Tree proba(3, 2);
-	proba.doNeuronNetwork();
-	cout << proba.getFunc() << endl;
-	cout<<proba.getMatrix();
+	MutationGP* cro = new TreeMutation(3);
+	for (int i = 0; i < 1000; i++) {
+		srand(i);
+	 	Tree proba1(3, 2);
+		int p1 = 0;
+		proba1.countNodes(p1);
+		//cout << proba1.getFunc() << endl;
+		cro->doMutChild(proba1);
+		//cout << proba1.getFunc() << endl;
+		proba1.doNeuronNetwork();
+		//cout << proba1.getMatrix();
+		cout << i << endl;
+	}
+
+
+	
+
 
 
 	

@@ -269,8 +269,11 @@ double Tree::getNumVertices()
 	return numVertices;
 }
 
-double Tree::getValue(double* x)
+double* Tree::getValue(double* x)
 {
+
+
+
 	//if (right != nullptr and left ==nullptr) {//Если справа что то есть то это точно унарная функци
 
 	//	return unarFunc[numberFunc](right->getValue(x));
@@ -310,51 +313,42 @@ void Tree::replaceNode(int search, Tree& newNode)//Замена выбранного узла
 
 void Tree::changeNode(int search, Tree& newNode)//Отличие от replace в том, что не меняются остальные узлы
 {
-	//if (numNodes == search) {//Если мы дошли до узла под каким то номером
-	//	if (newNode.getLastVertice()) {
-	//		//*this = newNode;
-	//		if (newNode.getLastVertice() == lastVertice) {
-	//			*this = newNode;
-	//			return;
-	//		}
-	//		return;
-	//	}
-	//	if (lastVertice) {
-	//		int tnumnodes = numNodes;
-	//		*this = newNode;
-	//		numNodes = tnumnodes;
-	//	}
-	//	if (newNode.getUnar() == unarFuncUs) {
-	//		numberFunc = newNode.getNumFunc();
-	//	}
-	//	else {
-	//		if (newNode.getUnar()) {
-	//			unarFuncUs = true;
-	//			numberFunc = newNode.getNumFunc();
-	//			left->~Tree();
-	//			left = nullptr;
-	//		}
-	//		else {
-	//			unarFuncUs = false;
-	//			numberFunc = newNode.getNumFunc();
-	//			if (left != nullptr) {
-	//				delete left;
-	//			}
-	//			left = new Tree;
-	//			//left->operator=(*copy.left);
-	//			*left = Tree(*(newNode.left));
-	//			left->numNodes = -1;//Сделано для того, чтобы не было изменений в этой ветви
-	//		}
-	//	}
-	//	return;
-	//}
+	if (numNodes == search) {//Если мы дошли до узла под каким то номером
+		if (newNode.getLastVertice()) {
+			//*this = newNode;
+			if (newNode.getLastVertice() == lastVertice) {
+				*this = newNode;
+				return;
+			}
+			return;
+		}
+		if (lastVertice) {
+			int tnumnodes = numNodes;
+			*this = newNode;
+			numNodes = tnumnodes;
+		}
+		else {
 
-	//if (left != nullptr and search <= left->getNumNodes()) {
-	//	left->changeNode(search, newNode);
-	//}
-	//if (right != nullptr and search <= right->getNumNodes()) {
-	//	right->changeNode(search, newNode);
-	//}
+
+			numberFunc = newNode.getNumFunc();
+			if (left != nullptr) {
+				delete left;
+			}
+			left = new Tree;
+			//left->operator=(*copy.left);
+			*left = Tree(*(newNode.left));
+			left->numNodes = -1;//Сделано для того, чтобы не было изменений в этой ветви
+			
+		}
+		return;
+	}
+
+	if (left != nullptr and search <= left->getNumNodes()) {
+		left->changeNode(search, newNode);
+	}
+	if (right != nullptr and search <= right->getNumNodes()) {
+		right->changeNode(search, newNode);
+	}
 }
 
 void Tree::trainWithDE(double** x, int size, double K1)

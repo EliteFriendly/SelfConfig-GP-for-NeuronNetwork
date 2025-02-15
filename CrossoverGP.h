@@ -46,7 +46,7 @@ protected:
 				}
 				if (node1->getLeft() != nullptr and i <= node1->getLeft()->getNumNodes()) {
 					//Проверка что оба узла хранят одну функцию
-					if ((node1->getUnar() == node2->getUnar()) and (node1->getLastVertice() == node2->getLastVertice())) {
+					if ((node1->getLastVertice() == node2->getLastVertice())) {
 						node1 = node1->getLeft();//Идем по маршруту и там и сям
 						node2 = node2->getLeft();
 						arrayReach[node1->getNumNodes()] = 1;//Пройденный узел отмечаем
@@ -78,7 +78,7 @@ protected:
 				}
 				//Аналогично но справа
 				if (node1->getRight() != nullptr and i <= node1->getRight()->getNumNodes()) {
-					if ((node1->getUnar() == node2->getUnar()) and (node1->getLastVertice() == node2->getLastVertice())) {
+					if ((node1->getLastVertice() == node2->getLastVertice())) {
 						node1 = node1->getRight();
 						node2 = node2->getRight();
 						arrayReach[node1->getNumNodes()] = 1;
@@ -115,8 +115,21 @@ protected:
 
 	}
 
+	int ruleReplace(int chosenNode, bool inputBranch, Tree& second) {
+		int secNode;
+		if (inputBranch) {
+			secNode = second.getLeft()->getNumNodes();
+			return rand() % (secNode + 1);//????
+		}
+		else {
+			secNode = second.getRight()->getNumNodes() - second.getLeft()->getNumNodes();//Чтобы узнать сколько узлов в правой ветке
+			return rand() % (secNode)+second.getLeft()->getNumNodes() + 1;
+		}
+
+	}
+	
 public:
-	virtual Tree getChild(Tree first, Tree second) = 0;
+	virtual Tree getChild(Tree &first, Tree &second) = 0;
 
 
 	~CrossoverGP() {
@@ -131,7 +144,7 @@ public:
 class EmptyCrossover : public CrossoverGP {
 public:
 
-	Tree getChild(Tree first, Tree second) {
+	Tree getChild(Tree &first, Tree &second) {
 
 		if (rand() % 2) {
 			return first;
@@ -150,15 +163,17 @@ class StandartCrossover : public CrossoverGP {
 
 
 
-	Tree getChild(Tree first, Tree second) {
+	Tree getChild(Tree &first, Tree &second) {
 
 		Tree child(first);
 		int r = child.getNumNodes();
 		int chosenNode = rand() % r;
-
+		bool chosenInputBranch = false;
+		if (chosenNode <= child.getLeft()->getNumNodes()) {
+			chosenInputBranch = true;
+		}
 		//Выбор рандомного узла для 2 родителя
-		int r2 = second.getNumNodes();
-		int chosenNode2 = rand() % (r2 + 1);
+		int chosenNode2 = ruleReplace(chosenNode,chosenInputBranch,second);
 		Tree* nodeParent = &second;
 		bool t = false;
 		//Начало спуска до этого узла
@@ -200,7 +215,7 @@ private:
 
 public:
 
-	Tree getChild(Tree first, Tree second) {
+	Tree getChild(Tree &first, Tree &second) {
 
 		Tree child(first);
 		findReach(child, second);
@@ -280,7 +295,7 @@ class UniformCrossover : public CrossoverGP {
 
 public:
 
-	Tree getChild(Tree first, Tree second) {
+	Tree getChild(Tree& first, Tree& second) {
 
 		Tree child(first);
 		findReach(child, second);

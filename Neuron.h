@@ -13,6 +13,7 @@ class Neuron
 	int useFunc;//Номер используемой функции, или входа(от 0)
 	bool inputBranch = false;//Находится ли в ветви входа
 
+	double* coefficients;//Коэффициенты вместе со свободным
 
 public:
 	Neuron() {};
@@ -22,6 +23,12 @@ public:
 		useFunc = copy.useFunc;
 		inputBranch = copy.inputBranch;
 		if (copy.input != nullptr) {
+			if (input != nullptr) {
+				for (int i = 0; i < amountInp; i++) {
+					delete[] input[i];
+				}
+				delete[] input;
+			}
 			input = new int* [amountInp];
 			for (int i = 0; i < amountInp; i++) {
 				input[i] = new int[2];
@@ -29,6 +36,15 @@ public:
 				input[i][1] = copy.input[i][1];
 			}
 		}
+		if (copy.coefficients != nullptr) {
+			if (coefficients != nullptr)
+				delete[] coefficients;
+			coefficients = new double[amountInp+1];
+			for (int i = 0; i < amountInp+1; i++) {
+				coefficients[i] = copy.coefficients[i];
+			}
+		}
+		
 
 	}
 	Neuron(bool inputBranch, int numberInput):inputBranch(inputBranch),useFunc(numberInput) {
@@ -37,6 +53,26 @@ public:
 	}
 	Neuron(int useFunc):useFunc(useFunc){};
 	
+	void setCoefficients(double* coef) {
+		coefficients = new double[amountInp + 1];
+		for (int i = 0; i < amountInp + 1; i++) {
+			coefficients[i] = coef[i];
+		}
+	}
+
+	double getValue(function <double(double)> &funcActivation, double* inputs) {
+		double sum = 0;
+		for (int i = 0; i < amountInp; i++) {
+			sum += coefficients[i] * inputs[i];
+		}
+		sum += coefficients[amountInp];
+		return funcActivation(sum);
+	}
+
+	int getUseFunc() {
+		return useFunc;
+	}
+
 	void connect(int amount,int* xOutputs, int* yOutputs, int x, int y)//Вводить х и у те, относительно коннекчущего узла
 	{
 		if (input == nullptr) {//РАссмотрен случай когда справа ТОЧНО не окажется входящих узлов
@@ -100,11 +136,25 @@ public:
 		useFunc = copy.useFunc;
 		inputBranch = copy.inputBranch;
 		if (copy.input != nullptr) {
+			if (input != nullptr) {
+				for (int i = 0; i < amountInp; i++) {
+					delete[] input[i];
+				}
+				delete[] input;
+			}
 			input = new int* [amountInp];
 			for (int i = 0; i < amountInp; i++) {
 				input[i] = new int[2];
 				input[i][0] = copy.input[i][0];
 				input[i][1] = copy.input[i][1];
+			}
+		}
+		if (copy.coefficients != nullptr) {
+			if (coefficients != nullptr)
+				delete[] coefficients;
+			coefficients = new double[amountInp + 1];
+			for (int i = 0; i < amountInp + 1; i++) {
+				coefficients[i] = copy.coefficients[i];
 			}
 		}
 		return *this;

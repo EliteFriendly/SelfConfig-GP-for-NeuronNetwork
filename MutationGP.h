@@ -29,9 +29,12 @@ public:
 	void doMutChild(Tree& ind) {
 
 		int r = ind.getNumNodes();
-		int chosenNode = rand() % (r + 1);
-		//Tree* node = &ind;
-		Tree newNode(treeDeapth, ind.getAmmInputs());//Уже отнималась единица до этого
+		int chosenNode = rand() % r;
+		bool chosenInputBranch = false;
+		if (chosenNode <= ind.getLeft()->getNumNodes()) {
+			chosenInputBranch = true;
+		}
+		Tree newNode(treeDeapth,ind.getAmmInputs(), chosenInputBranch);//Уже отнималась единица до этого
 		ind.replaceNode(chosenNode, newNode);
 		int nodes = 0, lvl = 0;
 		ind.recountLayers(lvl);

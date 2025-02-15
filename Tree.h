@@ -50,6 +50,7 @@ private:
 	int* ammNeuron = nullptr;//Количество узлов в слое
 	int ammLayers = 0;//Количество слоев
 	Neuron** network = nullptr;
+	Neuron* output = nullptr;
 
 	Tree* left = nullptr;
 	Tree* right = nullptr;
@@ -78,14 +79,14 @@ private:
 	};
 
 
-	Tree(int d, int ammInput, bool inputBranch);
+	
 
 
 public:
 	Tree() {}
+	Tree(int d, int ammInput, bool inputBranch);
 	Tree(const Tree &copy) 
 	{
-		this->~Tree();
 		ammLayers = copy.ammLayers;
 		mainNode = copy.mainNode;
 		inputBranch = copy.inputBranch;
@@ -103,6 +104,14 @@ public:
 			delete[] ammNeuron;
 		}
 
+		if (copy.output != nullptr) {
+			if (output != nullptr)
+				delete output;
+			output = new Neuron[ammInputs];
+			for (int i = 0; i < ammInputs; i++) {
+				output[i] = copy.output[i];
+			}
+		}
 		if (copy.ammNeuron != nullptr) {
 			ammNeuron = new int[ammLayers];
 			for (int i = 0; i < ammLayers; i++) {
@@ -173,7 +182,7 @@ public:
 	int getNumFunc() {
 		return numberFunc;
 	}
-	double getValue(double *x);
+	double* getValue(double *x);
 	int getNumNodes() {
 		
 		return numNodes;
@@ -248,25 +257,55 @@ public:
 
 	Tree operator =(const Tree& copy) {
 
-
-
-
-
+		ammLayers = copy.ammLayers;
+		mainNode = copy.mainNode;
+		inputBranch = copy.inputBranch;
+		size = copy.size;
 		numberFunc = copy.numberFunc;
 		layerLevel = copy.layerLevel;
-		lastVertice = copy.lastVertice; 
+		lastVertice = copy.lastVertice;
 		numInput = copy.numInput;
 		numVertices = copy.numVertices;
 		numNodes = copy.numNodes;
 		fitness = copy.fitness;
 		ammInputs = copy.ammInputs;
+
+		if (ammNeuron != nullptr) {
+			delete[] ammNeuron;
+		}
+
+		if (copy.output != nullptr) {
+			if (output != nullptr)
+				delete output;
+			output = new Neuron[ammInputs];
+			for (int i = 0; i < ammInputs; i++) {
+				output[i] = copy.output[i];
+			}
+		}
+
+		if (copy.ammNeuron != nullptr) {
+			ammNeuron = new int[ammLayers];
+			for (int i = 0; i < ammLayers; i++) {
+				ammNeuron[i] = copy.ammNeuron[i];
+			}
+		}
+		if (copy.network != nullptr) {
+			network = new Neuron * [ammLayers];
+			for (int i = 0; i < ammLayers; i++) {
+				network[i] = new Neuron[ammNeuron[i]];
+				for (int j = 0; j < ammNeuron[i]; j++) {
+					network[i][j] = copy.network[i][j];
+				}
+			}
+		}
+
+
 		//Выделение памяти чтобы не было кучи взаимосвязанных индивидлв
 		if (copy.left != nullptr) {
 			if (left != nullptr) {
 				delete left;
 			}
 			left = new Tree;
-			//left->operator=(*copy.left);
 			*left = Tree(*(copy.left));
 		}
 		else {
@@ -280,7 +319,6 @@ public:
 				delete right;
 			}
 			right = new Tree;
-			//right->operator=(*copy.right);
 			*right = Tree(*(copy.right));
 		}
 		else {
