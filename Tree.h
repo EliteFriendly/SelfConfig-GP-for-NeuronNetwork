@@ -40,6 +40,7 @@ private:
 
 	int numInput = NULL;//Номер входа
 	int ammInputs;//Количество входов
+	int ammOutputs;//Количество выходов
 
 	double fitness=-9999999;//Ну тут понятно
 
@@ -87,6 +88,7 @@ public:
 	Tree(int d, int ammInput, bool inputBranch);
 	Tree(const Tree &copy) 
 	{
+		ammOutputs = copy.ammOutputs;
 		ammLayers = copy.ammLayers;
 		mainNode = copy.mainNode;
 		inputBranch = copy.inputBranch;
@@ -162,10 +164,12 @@ public:
 
 	string getMatrix();
 
+
+
 	double getFitness() {
 		return fitness;
 	}
-	Tree(int d,int numInputs);
+	Tree(int d,int numInputs, int numOutputs);
 	string getFunc();
 
 	void doNeuronNetwork();
@@ -256,7 +260,8 @@ public:
 
 
 	Tree operator =(const Tree& copy) {
-
+		
+		ammOutputs = copy.ammOutputs;
 		ammLayers = copy.ammLayers;
 		mainNode = copy.mainNode;
 		inputBranch = copy.inputBranch;

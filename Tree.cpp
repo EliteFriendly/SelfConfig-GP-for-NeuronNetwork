@@ -96,9 +96,10 @@ Tree::Tree(int d, int ammInput, bool inputBranch) :inputBranch(inputBranch), amm
 
 
 
-Tree::Tree(int d, int numInputs)
+Tree::Tree(int d, int numInputs, int numOuputs)
 {
 	ammInputs = numInputs;
+	ammOutputs = numOuputs;
 	mainNode = true;
 	//Так это основной узел, у него все определено левый и правый уже понятны
 	numberFunc = 1;
@@ -271,7 +272,22 @@ double Tree::getNumVertices()
 
 double* Tree::getValue(double* x)
 {
+	double** res = new double*[ammLayers];
+	for (int i = 0; i < ammLayers; i++) {
+		res[i] = new double[ammNeuron[i]];
+	}
 
+	for(int i = 0; i < ammLayers; i++){
+		for (int j = 0; j < ammNeuron[i]; j++) {
+			if (network[i][j].getInputBranch()) {
+				res[i][j] = x[network[i][j].getUseFunc()];
+				continue;
+			}
+			for (int w = 0; w < network[i][j].getAmountInp(); w++) {
+				
+			}
+		}
+	}
 
 
 	//if (right != nullptr and left ==nullptr) {//Если справа что то есть то это точно унарная функци

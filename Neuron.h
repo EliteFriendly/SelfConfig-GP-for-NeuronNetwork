@@ -61,6 +61,9 @@ public:
 	}
 
 	double getValue(function <double(double)> &funcActivation, double* inputs) {
+		if (inputBranch) {
+			return inputs[useFunc];
+		}
 		double sum = 0;
 		for (int i = 0; i < amountInp; i++) {
 			sum += coefficients[i] * inputs[i];
@@ -71,6 +74,12 @@ public:
 
 	int getUseFunc() {
 		return useFunc;
+	}
+	bool getInputBranch() {
+		return inputBranch;
+	}
+	int getAmountInp() {
+		return amountInp;
 	}
 
 	void connect(int amount,int* xOutputs, int* yOutputs, int x, int y)//¬водить х и у те, относительно коннекчущего узла
