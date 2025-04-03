@@ -10,10 +10,10 @@ class Neuron
 	bool output = false;//Есть ли выходные узлы
 	int amountInp = 0;//Только количество входов
 	
-	int useFunc;//Номер используемой функции, или входа(от 0)
+	int useFunc = NULL;//Номер используемой функции, или входа(от 0)
 	bool inputBranch = false;//Находится ли в ветви входа
 
-	double* coefficients;//Коэффициенты вместе со свободным
+	double* coefficients = nullptr;//Коэффициенты вместе со свободным
 
 public:
 	Neuron() {};
@@ -53,11 +53,13 @@ public:
 	}
 	Neuron(int useFunc):useFunc(useFunc){};
 	
-	void setCoefficients(double* coef) {
+	void setCoefficients(double* coef, int& cursor) {
 		coefficients = new double[amountInp + 1];
 		for (int i = 0; i < amountInp + 1; i++) {
-			coefficients[i] = coef[i];
+			coefficients[i] = coef[i + cursor];
+
 		}
+		cursor += amountInp + 1;//???????? Возможно ошибка, ибо курсор может захватывать часть другого нейрона
 	}
 
 	double getValue(function <double(double)> &funcActivation, double* inputs) {

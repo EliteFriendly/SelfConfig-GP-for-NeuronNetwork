@@ -56,6 +56,42 @@ string Tree::getMatrix()
 	return ss.str();
 }
 
+void Tree::doNeuronNetwork()
+{
+	doHiddenNeuron();//Сначала обьединяем в единую сеть все скрытые нейроны
+	int amNeuron = 0;
+	for (int i = 0; i < ammLayers; i++)//Смотрим сколько вообще нейроно в сети
+		amNeuron += ammNeuron[i];
+
+	int* coordXOutput = new int[amNeuron];
+	int* coordYOutput = new int[amNeuron];
+	int i1 = 0;//Количество нейронов где нет выхода
+	for (int i = 0; i < ammLayers; i++) {//Пробегаемся по всем потеряшками
+		for (int j = 0; j < ammNeuron[i]; j++) {
+				
+				if (!network[i][j].getOutput()) {
+					coordXOutput[i1] = i;
+					coordYOutput[i1] = j;
+					i1++;
+					network[i][j].haveOutput();
+				}
+			
+		}
+
+	}
+
+	output = new Neuron[ammOutputs];
+
+	for (int i = 0; i < ammOutputs; i++) {//Теперь все выходы конектим к выходам
+		output[i].connect(i1, coordXOutput, coordYOutput, ammLayers, i);
+	}
+
+	delete[] coordXOutput;
+	delete[] coordYOutput;
+
+
+}
+
 
 
 
@@ -140,12 +176,12 @@ string Tree::getFunc()
 	return ss.str();
 }
 
-void Tree::doNeuronNetwork()
+void Tree::doHiddenNeuron()
 {
 	if (lastVertice)
 		return;
-	left->doNeuronNetwork();
-	right->doNeuronNetwork();
+	left->doHiddenNeuron();
+	right->doHiddenNeuron();
 	if (numberFunc == 0) {//Случай сложения узлов
 		ammLayers = max(left->ammLayers, right->ammLayers);//Ищем максимальное количество слоев
 		int minLayers = min(left->ammLayers, right->ammLayers);
@@ -229,22 +265,24 @@ void Tree::doNeuronNetwork()
 				}
 			}
 		}
+		delete[] coordXOutput;
+		delete[] coordYOutput;
 		
 	}
 }
 
-void Tree::changeCoef(double *in,int &z)
+void Tree::changeCoef(double *coef)
 {
-	//Заполнение будет происходить слева направо
-	if (left != nullptr) {//Идем сначала по левой стороне до конца
-		left->changeCoef(in, z);
+	//Тут заполняется ТОЛЬКО нерйонная сеть
+	int cursor = 0;//Это будет динамически меняться в каждом нейроне
+	for (int i = 0; i < ammLayers; i++) {
+		for (int j = 0; j < ammNeuron[i]; j++) {
+			network[i][j].setCoefficients(coef, cursor);
+		}
 	}
-	if (right != nullptr) {//Если нет ничего слева
-		right->changeCoef(in, z);
-	}
-	if (lastVertice and numVertices == 1) {
-		//coef = in[z];//Замена коэффициентов в случае если все ок
-		z++;//Работа с памятью!!!
+	//Теперь заполняем выходные значения, или те что выходые нейроны
+	for (int i = 0; i < ammOutputs; i++) {
+		output[i].setCoefficients(coef, cursor);
 	}
 }
 
@@ -272,6 +310,7 @@ double Tree::getNumVertices()
 
 double* Tree::getValue(double* x)
 {
+	//Создаем массив для хранения значений
 	double** res = new double*[ammLayers];
 	for (int i = 0; i < ammLayers; i++) {
 		res[i] = new double[ammNeuron[i]];
@@ -279,37 +318,38 @@ double* Tree::getValue(double* x)
 
 	for(int i = 0; i < ammLayers; i++){
 		for (int j = 0; j < ammNeuron[i]; j++) {
-			if (network[i][j].getInputBranch()) {
-				res[i][j] = x[network[i][j].getUseFunc()];
+			if (network[i][j].getInputBranch()) {//В случае если это входной нейрон
+				res[i][j] = x[network[i][j].getUseFunc()];//Просто берем значение из входного массива
 				continue;
 			}
+			double* input = new double[network[i][j].getAmountInp()];//Заполняется элементами, которые будут подаваться на вход в нейрон
 			for (int w = 0; w < network[i][j].getAmountInp(); w++) {
-				
+				input[w] = res[i + network[i][j].getCoord()[w][0]][j + network[i][j].getCoord()[w][1]];
 			}
+			res[i][j] = network[i][j].getValue(funcActivation[network[i][j].getUseFunc()], input);//Динамически заполняем матрицу полученными значениями
+			delete[] input;
 		}
 	}
 
+	//Теперь заполняем выходные значения, или те что выходые нейроны
+	double* outputRes = new double[ammOutputs];
+	//По принципу тут все тоже самое, что и в случае с обычными нейронами
+	for (int i = 0; i < ammOutputs; i++) {
+		double* input = new double[output[i].getAmountInp()];
+		for (int w = 0; w < output[i].getAmountInp(); w++) {
+			input[w] = res[ammLayers - 1 + output[i].getCoord()[w][0]][ammOutputs - 1 + output[i].getCoord()[w][1]];
+		}
+		outputRes[i] = output[i].getValue(funcActivation[output[i].getUseFunc()], input);
+		delete[] input;
+	}
+	for (int i = 0; i < ammLayers; i++) {
+		delete[] res[i];
+	}
 
-	//if (right != nullptr and left ==nullptr) {//Если справа что то есть то это точно унарная функци
+	delete[] res;
 
-	//	return unarFunc[numberFunc](right->getValue(x));
-	//	
-	//}
-	//if (lastVertice) {//Если дошли до вершины
-	//	if (numVertices==1) {
-	//		return coef;
-	//	}
-	//	if (numVertices==0) {
-	//		return x[numInput];
-	//	}
-	//	else {
-	//		cout << "Непредвиденность в getValue";
-	//		exit(0);
-	//	}
-	//}
-
-
-	return 0.0;
+	return outputRes;//Возвращаем массив значений, в зависимости от количества выходов
+	
 }
 
 void Tree::replaceNode(int search, Tree& newNode)//Замена выбранного узла

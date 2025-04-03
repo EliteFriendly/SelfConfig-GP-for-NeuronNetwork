@@ -50,8 +50,10 @@ private:
 
 	int* ammNeuron = nullptr;//Количество узлов в слое
 	int ammLayers = 0;//Количество слоев
-	Neuron** network = nullptr;
-	Neuron* output = nullptr;
+
+	Neuron** network = nullptr;//Сеть нейронов без выходных
+
+	Neuron* output = nullptr;//Нейроны на выход, без функции активации
 
 	Tree* left = nullptr;
 	Tree* right = nullptr;
@@ -61,27 +63,26 @@ private:
 
 	int amFuncActive = 16;
 	function <double(double)> funcActivation[16] = {
-		[](double x) { return 0; } ,//1
-		[](double x) {return sin(x); },//2
-		[](double x) {if (x < -1) return -1.0; if (x > 1) return 1.0; else return x; },//3
-		[](double x) {return 2 / (1 + exp(x)) - 1; },//4
-		//5 пропущена
-		[](double x) {return exp(x); },//6
-		[](double x) {return abs(x); },//7
-		[](double x) {return 1 - exp(x); },//8
-		[](double x) {return x; },//9
-		[](double x) {return pow(x,2); },//10
-		[](double x) {return pow(x,3); },//11
-		[](double x) { if (x == 0) return 0.0; return pow(x,-1); },//12
-		[](double x) {return 1; },//13
-		[](double x) {return 1 / (1 + exp(-x)); },//14
-		[](double x) {return exp(-(x * x) / 2); },//15
-		[](double x) {if (x < -1 / 2) return -1.0; if (x > 1 / 2) return 1.0; else return x + 1 / 2; }//16
+		[](double x) { return x; } ,//0
+		[](double x) {return sin(x); },//1
+		[](double x) {if (x < -1) return -1.0; if (x > 1) return 1.0; else return x; },//2
+		[](double x) {return 2 / (1 + exp(x)) - 1; },//3
+		[](double x) {return exp(x); },//4
+		[](double x) {return abs(x); },//5
+		[](double x) {return 1 - exp(x); },//6
+		[](double x) {return 0; },//7
+		[](double x) {return pow(x,2); },//8
+		[](double x) {return pow(x,3); },//9
+		[](double x) { if (x == 0) return 0.0; return pow(x,-1); },//10
+		[](double x) {return 1; },//11
+		[](double x) {return 1 / (1 + exp(-x)); },//12
+		[](double x) {return exp(-(x * x) / 2); },//13
+		[](double x) {if (x < -1 / 2) return -1.0; if (x > 1 / 2) return 1.0; else return x + 1 / 2; }//14
 	};
 
 
+	void doHiddenNeuron();
 	
-
 
 public:
 	Tree() {}
@@ -109,8 +110,8 @@ public:
 		if (copy.output != nullptr) {
 			if (output != nullptr)
 				delete output;
-			output = new Neuron[ammInputs];
-			for (int i = 0; i < ammInputs; i++) {
+			output = new Neuron[ammOutputs];
+			for (int i = 0; i < ammOutputs; i++) {
 				output[i] = copy.output[i];
 			}
 		}
@@ -160,19 +161,20 @@ public:
 		}
 		
 	}
+	Tree(int d, int numInputs, int numOutputs);
+
 	void calcFitness(double** x, int size,double K1);
 
 	string getMatrix();
 
-
+	void doNeuronNetwork();
 
 	double getFitness() {
 		return fitness;
 	}
-	Tree(int d,int numInputs, int numOutputs);
+	
 	string getFunc();
 
-	void doNeuronNetwork();
 
 	bool getLastVertice() {
 		return lastVertice;
@@ -181,7 +183,7 @@ public:
 	void countNodes(int&);
 	void recountLayers(int);
 
-	void changeCoef(double *,int&);
+	void changeCoef(double *);
 	double getNumVertices();
 	int getNumFunc() {
 		return numberFunc;
@@ -282,8 +284,8 @@ public:
 		if (copy.output != nullptr) {
 			if (output != nullptr)
 				delete output;
-			output = new Neuron[ammInputs];
-			for (int i = 0; i < ammInputs; i++) {
+			output = new Neuron[ammOutputs];
+			for (int i = 0; i < ammOutputs; i++) {
 				output[i] = copy.output[i];
 			}
 		}

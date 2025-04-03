@@ -87,22 +87,38 @@ double addNoise(double x, int power) {
 
 
 
-
+//Все нейроны 7 типа!!!!!!!!
 
 void main() {
-	MutationGP* cro = new TreeMutation(3);
-	for (int i = 0; i < 1000; i++) {
-		srand(i);
-	 	Tree proba1(3, 2);
-		int p1 = 0;
-		proba1.countNodes(p1);
-		//cout << proba1.getFunc() << endl;
-		cro->doMutChild(proba1);
-		//cout << proba1.getFunc() << endl;
-		proba1.doNeuronNetwork();
-		//cout << proba1.getMatrix();
-		cout << i << endl;
+	//do array from 1 to 100
+	srand(1);
+	double* data = new double[1000000];
+	double* pr = new double[2]{ 1.0,2.0 };
+	for (int i = 0; i < 1000000; i++) {
+		data[i] = 2;
 	}
+
+
+	Tree proba1(3, 2, 1);
+	proba1.doNeuronNetwork();
+	proba1.changeCoef(data);
+	cout << proba1.getValue(pr)[0] << ' ';
+
+
+	
+	//MutationGP* cro = new TreeMutation(3);
+	//for (int i = 0; i < 1000; i++) {
+	//	srand(i);
+	// 	
+	//	int p1 = 0;
+	//	proba1.countNodes(p1);
+	//	//cout << proba1.getFunc() << endl;
+	//	cro->doMutChild(proba1);
+	//	//cout << proba1.getFunc() << endl;
+	//	proba1.doNeuronNetwork();
+	//	//cout << proba1.getMatrix();
+	//	cout << i << endl;
+	//}
 
 
 	
