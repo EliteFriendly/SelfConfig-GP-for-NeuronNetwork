@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Diff_evolution/DiffEvolution.h"
 #include "Neuron.h"
+#include <string>
 
 /*
 Заходя суда помни!
@@ -23,6 +24,12 @@ vy
 */
 
 
+static double fixExp(double x) {//fix exponent
+	if (x <= -10) return exp(-10);
+	if (x >= 10) return exp(10);
+	return exp(x);
+};
+
 
 
 
@@ -33,7 +40,7 @@ class Tree
 private:
 	
 	int numberFunc;//Номер функции который используется в узле
-	int numVertices = 0;//Количество вершин где нужно настраивать коэффициенты
+	int numVertices = 0;//Количество вершин где нужно настраивать коэффициенты (не используется)
 	int numNodes;//Количество узлов ниже
 	int layerLevel;//На каком уровне относительно начала находится узел
 	int size;//Количество данных
@@ -48,6 +55,13 @@ private:
 	bool inputBranch;//Является ли узел ветвью входа
 	bool mainNode;//Начальный ли узел
 
+
+	//Связано с пригодностью
+	double ef = 1;//Коэффициент при RMSE
+	double nf = 5;//Коэффициент при количестве узлов
+	int maxNodes = 50;//Максимальное количество узлов в дереве
+
+
 	int* ammNeuron = nullptr;//Количество узлов в слое
 	int ammLayers = 0;//Количество слоев
 
@@ -60,29 +74,29 @@ private:
 
 
 	vector<string> strBinaryFunc = { "+",">" };//Символьный вывод функции
-
-	int amFuncActive = 16;
+	
+	int amFuncActive = 15;//Номер функции активации
 	function <double(double)> funcActivation[16] = {
 		[](double x) { return x; } ,//0
 		[](double x) {return sin(x); },//1
 		[](double x) {if (x < -1) return -1.0; if (x > 1) return 1.0; else return x; },//2
-		[](double x) {return 2 / (1 + exp(x)) - 1; },//3
-		[](double x) {return exp(x); },//4
+		[](double x) {return 2 / (1 + fixExp(x)) - 1; },//3
+		[](double x) {return fixExp(x); },//4
 		[](double x) {return abs(x); },//5
-		[](double x) {return 1 - exp(x); },//6
+		[](double x) {return 1 - fixExp(x); },//6
 		[](double x) {return 0; },//7
 		[](double x) {return pow(x,2); },//8
 		[](double x) {return pow(x,3); },//9
 		[](double x) { if (x == 0) return 0.0; return pow(x,-1); },//10
 		[](double x) {return 1; },//11
-		[](double x) {return 1 / (1 + exp(-x)); },//12
-		[](double x) {return exp(-(x * x) / 2); },//13
+		[](double x) {return 1 / (1 + fixExp(-x)); },//12
+		[](double x) {return fixExp(-(x * x) / 2); },//13
 		[](double x) {if (x < -1 / 2) return -1.0; if (x > 1 / 2) return 1.0; else return x + 1 / 2; }//14
 	};
 
 
 	void doHiddenNeuron();
-	
+
 
 public:
 	Tree() {}
@@ -163,11 +177,17 @@ public:
 	}
 	Tree(int d, int numInputs, int numOutputs);
 
-	void calcFitness(double** x, int size,double K1);
+	void calcFitness(double** x, int size);
 
 	string getMatrix();
 
 	void doNeuronNetwork();
+
+	void setCoefficientsFitness(double ef, double nf, int maxN) {
+		this->ef = ef;
+		this->nf = nf;
+		this->maxNodes = maxN;
+	}
 
 	double getFitness() {
 		return fitness;
@@ -196,6 +216,7 @@ public:
 	int getAmmInputs() {
 		return ammInputs;
 	}
+
 	~Tree() {
 		if (network != nullptr) {
 			if (!lastVertice) {
@@ -222,7 +243,7 @@ public:
 	void replaceNode(int, Tree&);
 	void changeNode(int, Tree&);
 
-	void trainWithDE(double** x, int size, double K1);
+	void trainWithDE(double** x, int size);
 
 
 

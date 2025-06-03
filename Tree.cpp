@@ -27,16 +27,25 @@ void Tree::recountLayers(int level)
 }
 
 
-void Tree::calcFitness(double** x, int size,double K1)
+void Tree::calcFitness(double** x, int size)
 {
-	double error = 0;
+	//calculated a RMSE
+	double RMSE = 0;
+	for (int i = 0; i < size; i++) {
+		double* res = getValue(x[i]);//Получаем значение нейронной сети для каждого входа
+		for (int j = 0; j < ammOutputs; j++) {
+			RMSE += pow(res[j] - x[i][ammInputs + j], 2);//Считаем MSE
+		}
+		delete[] res;
 
-	fitness = 0;//???????
-	if (fitness == 0)
-		fitness += 0.00001;
+
+	}
+	RMSE = sqrt(RMSE / (ammOutputs * size));//Считаем RMSE
+	fitness = 1 / (1 + ef * RMSE + nf * numNodes / maxNodes);//Считаем фитнес, где ef - коэффициент при RMSE, nf - коэффициент при количестве узлов, maxNodes - максимальное количество узлов в дереве
+
+
 	if (fitness == NULL) {
-		cout << "Фитнес равен NAN";
-		exit(0);
+		throw invalid_argument("Fitness is NULL");
 	}
 }
 
@@ -132,15 +141,15 @@ Tree::Tree(int d, int ammInput, bool inputBranch) :inputBranch(inputBranch), amm
 
 
 
-Tree::Tree(int d, int numInputs, int numOuputs)
+Tree::Tree(int d, int ammInputs, int ammOutputs)
 {
-	ammInputs = numInputs;
-	ammOutputs = numOuputs;
+	Tree::ammInputs = ammInputs;
+	Tree::ammOutputs = ammOutputs;
 	mainNode = true;
 	//Так это основной узел, у него все определено левый и правый уже понятны
 	numberFunc = 1;
-	left = new Tree(d - 1, numInputs, true);
-	right = new Tree(d - 1, numInputs, false);
+	left = new Tree(d - 1, ammInputs, true);
+	right = new Tree(d - 1, ammInputs, false);
 }
 
 
@@ -337,7 +346,7 @@ double* Tree::getValue(double* x)
 	for (int i = 0; i < ammOutputs; i++) {
 		double* input = new double[output[i].getAmountInp()];
 		for (int w = 0; w < output[i].getAmountInp(); w++) {
-			input[w] = res[ammLayers - 1 + output[i].getCoord()[w][0]][ammOutputs - 1 + output[i].getCoord()[w][1]];
+			input[w] = res[ammLayers + output[i].getCoord()[w][0]][ammOutputs - 1 + output[i].getCoord()[w][1]];
 		}
 		outputRes[i] = output[i].getValue(funcActivation[output[i].getUseFunc()], input);
 		delete[] input;
@@ -407,32 +416,33 @@ void Tree::changeNode(int search, Tree& newNode)//Отличие от replace в том, что 
 	}
 }
 
-void Tree::trainWithDE(double** x, int size, double K1)
+void Tree::trainWithDE(double** x, int size)
 {
-	/*if (label == nullptr) {
-		label = new int[size];
-		Tree::size = size;
+
+	//get amCoefficents from network
+	int amCoefficients = 0;
+	for (int i = 0; i < ammLayers; i++) {
+		for (int j = 0; j < ammNeuron[i]; j++) {
+			amCoefficients += network[i][j].getAmountInp()+1;
+		}
+	}
+	for (int i = 0; i < ammOutputs; i++) {
+		amCoefficients += output[i].getAmountInp() + 1;
 	}
 
-
-
-
-
-	int numVertices = getNumVertices();
-	if (numVertices == 0) {
-		calcFitness(x, size, K1);
-		return;
+	if (amCoefficients == 0) {
+		cout << "Ошибка в количестве коэффициентов, возможно не хватает нейронов в сети";
+		exit(0);
 	}
 	function <double(double*)> func = [&](double* input) {
-		int i = 0;
-		changeCoef(input, i);
-		calcFitness(x, size, K1);
+		changeCoef(input);
+		calcFitness(x, size);
 		return fitness;
 		};
 
-	double* limits = new double[numVertices * 2];
+	double* limits = new double[amCoefficients * 2];
 
-	for (int i = 0; i < numVertices * 2; i++) {
+	for (int i = 0; i < amCoefficients * 2; i++) {
 		if (i % 2) {
 			limits[i] = 30;
 		}
@@ -442,13 +452,13 @@ void Tree::trainWithDE(double** x, int size, double K1)
 	}
 
 
-	DiffEvolution DE(func, limits, numVertices, "targetToBest1", "max");
+	DiffEvolution DE(func, limits, amCoefficients, "targetToBest1", "max");
 	DE.startSearch(0.01, 0.5, 0.5, 50, 50);
 	int i = 0;
 	double* coef = DE.getBestCoordinates();
-	changeCoef(coef, i);
-	calcFitness(x, size, K1);
-*/
+	changeCoef(coef);
+	calcFitness(x, size);
+
 
 
 }

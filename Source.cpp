@@ -71,9 +71,17 @@ double funcRosenbrock(double* x) {
 
 */
 
-void yi(int* in) {
-	in[0];
+
+//n-dimension functions for tests
+double funcSphere(double* x) {
+	double y = 0;
+	for (int i = 0; i < dimension; i++) {
+		y += pow(x[i], 2);
+	}
+	return y;
 }
+
+
 
 
 double addNoise(double x, int power) {
@@ -91,18 +99,86 @@ double addNoise(double x, int power) {
 
 void main() {
 	//do array from 1 to 100
-	srand(1);
+	srand(10);
+	setlocale(LC_ALL, "Russian");
+	//generate train data 
+	int str = 50; //number of train data
+	double a = -4;
+	double b = 4;
+	double h = (b - a) / str;
+	double** trainData = new double* [str];
+	for (int i = 0; i < str; i++) {
+		trainData[i] = new double[dimension+1];
+		for (int j = 0;j < dimension; j++) {
+			trainData[i][j] = a + h * i;
+			trainData[i][dimension] = addNoise(funcRastrigin(trainData[i]), 10);
+		}
+	}
+	//cout train data
+	//for (int i = 0; i < str; i++) {
+	//	for (int j = 0; j < dimension + 1; j++) {
+	//		cout << trainData[i][j] << ' ';
+	//	}
+	//	cout << endl;
+	//}
+
+
 	double* data = new double[1000000];
 	double* pr = new double[2]{ 1.0,2.0 };
 	for (int i = 0; i < 1000000; i++) {
 		data[i] = 2;
+
+	}
+
+	//srand(4);
+	//Tree proba1(rand() % 4 + 2, dimension, 1);
+	//proba1.doNeuronNetwork();
+	//cout << proba1.getMatrix() << endl;
+	//proba1.trainWithDE(trainData, str);
+	//proba1.calcFitness(trainData, str);
+	//cout << "Fitness END: " << proba1.getFitness() << endl;
+
+	//cout << proba1.getValue(pr)[0] << ' ';
+
+	/*srand(109);
+	Tree proba(rand() % 2 + 2, dimension, 1);
+	proba.doNeuronNetwork();
+	proba.trainWithDE(trainData, str);
+	proba.calcFitness(trainData, str);
+
+
+	cout << "Fitness END: " << proba.getFitness() << endl;
+	cout << proba.getMatrix() << endl;*/
+
+
+
+	//do stress test
+	
+	for (int i = 0; i < 400; i++) {
+		srand(i);
+		try {
+			Tree proba(rand()%4+2, dimension, 1);
+			proba.doNeuronNetwork();
+			proba.trainWithDE(trainData, str);
+			proba.calcFitness(trainData, str);
+			cout << "Fitness: " << proba.getFitness()<<" in "<< i <<" cycle" << endl;
+			//cout << proba.getMatrix() << endl;
+			//cout << proba.getValue(pr)[0] << ' ';
+		}
+		catch (const std::exception& e) {
+			cout << "Exception caught: " << e.what() << endl;
+			cout << "with next settings:" << endl;
+			cout << "i: " << i << endl;
+			cout << "rand: " << rand() % 4 + 2 << endl;
+			
+		}
+		catch (...) {
+			cerr << "Unknown exception caught" << endl;
+		}
 	}
 
 
-	Tree proba1(3, 2, 1);
-	proba1.doNeuronNetwork();
-	proba1.changeCoef(data);
-	cout << proba1.getValue(pr)[0] << ' ';
+
 
 
 	
