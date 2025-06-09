@@ -180,7 +180,7 @@ void AdaptiveGeneticProgramming::recalcProbabilities()
 
 }
 
-void AdaptiveGeneticProgramming::startTrain(double** x, int ammInputs, int size, int numIndividuals, int numGeneration)
+void AdaptiveGeneticProgramming::startTrain(double** x, int ammInputs,int amOutPuts, int size, int numIndividuals, int numGeneration)
 {
 
 	fSel.open("Probabilities/ProbabilSel_" + to_string(numberFile)+".txt");
@@ -193,6 +193,7 @@ void AdaptiveGeneticProgramming::startTrain(double** x, int ammInputs, int size,
 
 	AdaptiveGeneticProgramming::size = size;
 	AdaptiveGeneticProgramming::ammInputs = ammInputs;
+	AdaptiveGeneticProgramming::ammOutputs = amOutPuts;
 
 
 	
@@ -209,7 +210,7 @@ void AdaptiveGeneticProgramming::startTrain(double** x, int ammInputs, int size,
 
 	//Первая иницилизация поколения
 	for (int i = 0; i < numIndividuals; i++) {
-		Tree t(treeDepth-1,ammInputs,1);
+		Tree t(treeDepth-1,ammInputs,amOutPuts);
 		//Подсчет узлов и уровней
 		int nodes = 0, lvl = 0;
 		t.recountLayers(lvl);

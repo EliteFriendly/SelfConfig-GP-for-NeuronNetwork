@@ -53,7 +53,7 @@ class Tree
 {
 private:
 
-	int numberFunc;//Номер функции который используется в узле
+	int numberFunc;//Номер функции который используется в узле, в вершинах функция активации
 	int numVertices = 0;//Количество вершин где нужно настраивать коэффициенты (не используется)
 	int numNodes;//Количество узлов ниже
 	int layerLevel;//На каком уровне относительно начала находится узел
@@ -89,7 +89,7 @@ private:
 
 	vector<string> strBinaryFunc = { "+",">" };//Символьный вывод функции
 
-	int amFuncActive = 15;//Номер функции активации
+	int amFuncActive = 15;//Количество функций активации
 	function <double(double)> funcActivation[16] = {
 		[](double x) { return x; } ,//0
 		[](double x) {return sin(x); },//1

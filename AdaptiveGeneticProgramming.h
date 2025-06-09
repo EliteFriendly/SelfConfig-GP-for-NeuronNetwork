@@ -22,6 +22,7 @@ private:
 	double socialCard = 0.1;//Минимальная вероятность выбора
 
 	int ammInputs;//Количество осей или входов
+	int ammOutputs;//Количество выходов или выходных нейронов
 	int size;//Количество точек
 	int numberFile = 1;//Используется для именовании файла
 
@@ -141,22 +142,30 @@ public:
 		}
 		crossProbabilities[0] = 0.1;//Ибо там пустой кроссовер
 	}
-	void startTrain(double** x, int ammInputs, int size, int numIndividuals, int numGeneration);
+	void startTrain(double** x, int ammInputs, int amOutPuts, int size, int numIndividuals, int numGeneration);
 	Tree getBest() {
 		return bestIndividual;
 	}
-	double getError(double** x, double *y, int size) {
+	double getError(double** x, int size) {
 		double sum = 0;//Среднеквадратичная ошибка
 		for (int i = 0; i < size; i++) {
-			sum += pow(bestIndividual.getValue(x[i])[0] - y[i], 2);
+			for (int j = 0; j < ammOutputs; j++) { 
+				double res = bestIndividual.getValue(x[i])[j];
+				sum += pow(res - x[i][ammInputs + j], 2); //x[i][ammInputs + j] - это значение из обучающей выборки
+			}
 		}
-		sum = pow(sum , 0.5) / double(size);
+		sum = pow(sum / (ammOutputs * size), 0.5); //Среднеквадратичная ошибка
 		return sum;
 
 	}
 
 	void numFile(int num) {
 		numberFile = num;
+	}
+	void saveBestIndividualtoFile() {
+		
+		bestIndividual.saveNetworkToFile(numberFile + "_best.txt");
+
 	}
 
 	~AdaptiveGeneticProgramming() {

@@ -100,6 +100,7 @@ double addNoise(double x, int power) {
 
 void main() {
 	int treeDepth = 5; //depth of tree
+	int amOutputs = 1; //number of outputs
 	CrossoverGP** crossover = new CrossoverGP * [4];
 	crossover[0] = new EmptyCrossover();
 	crossover[1] = new UniformCrossover();
@@ -128,10 +129,10 @@ void main() {
 
 	try {
 		AdaptiveGeneticProgramming proba(treeDepth);
-		proba.startTrain(trainData, dimension, str, 20, 20);
+		proba.startTrain(trainData, dimension,amOutputs, str, 20, 20);
 		Tree best = proba.getBest();
 		cout << "Best fitness: " << best.getFitness() << endl;
-		cout << "x=" << trainData[0][0] << " y=" << best.getValue(trainData[0])[0] << endl;
+		cout << "Error: " << proba.getError(trainData, str) << endl;
 	}
 	catch (const std::exception& e) {
 		cout << "Exception caught: " << e.what() << endl;
