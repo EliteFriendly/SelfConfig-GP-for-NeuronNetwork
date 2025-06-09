@@ -117,6 +117,7 @@ public:
 	Tree(int d, int ammInput, bool inputBranch);
 	Tree(const Tree& copy)
 	{
+
 		if (copy.output != nullptr) {
 			if (output != nullptr)
 				delete[] output;
@@ -124,6 +125,12 @@ public:
 			output = new Neuron[copy.ammOutputs];
 			for (int i = 0; i < copy.ammOutputs; i++) {
 				output[i] = copy.output[i];
+			}
+		}
+		else {
+			if (output != nullptr) {
+				delete[] output;
+				output = nullptr;
 			}
 		}
 
@@ -135,6 +142,12 @@ public:
 			ammNeuron = new int[copy.ammLayers];
 			for (int i = 0; i < copy.ammLayers; i++) {
 				ammNeuron[i] = copy.ammNeuron[i];
+			}
+		}
+		else {
+			if (ammNeuron != nullptr) {
+				delete[] ammNeuron;
+				ammNeuron = nullptr;
 			}
 		}
 		if (copy.network != nullptr) {
@@ -150,6 +163,15 @@ public:
 				for (int j = 0; j < ammNeuron[i]; j++) {
 					network[i][j] = copy.network[i][j];
 				}
+			}
+		}
+		else {
+			if (network != nullptr) {
+				for (int i = 0; i < ammLayers; i++) {
+					delete[] network[i];
+				}
+				delete[] network;
+				network = nullptr;
 			}
 		}
 
@@ -205,6 +227,7 @@ public:
 				right = nullptr;
 			}
 		}
+
 
 	}
 
@@ -279,6 +302,7 @@ public:
 			delete right;
 			right = nullptr;
 		}
+
 	}
 	void replaceNode(int, Tree&);
 	void changeNode(int, Tree&);
@@ -518,6 +542,12 @@ public:
 				output[i] = copy.output[i];
 			}
 		}
+		else {
+			if (output != nullptr) {
+				delete[] output;
+				output = nullptr;
+			}
+		}
 
 		if (copy.ammNeuron != nullptr) {
 			if (ammNeuron != nullptr) {
@@ -527,6 +557,12 @@ public:
 			ammNeuron = new int[copy.ammLayers];
 			for (int i = 0; i < copy.ammLayers; i++) {
 				ammNeuron[i] = copy.ammNeuron[i];
+			}
+		}
+		else {
+			if (ammNeuron != nullptr) {
+				delete[] ammNeuron;
+				ammNeuron = nullptr;
 			}
 		}
 		if (copy.network != nullptr) {
@@ -542,6 +578,15 @@ public:
 				for (int j = 0; j < ammNeuron[i]; j++) {
 					network[i][j] = copy.network[i][j];
 				}
+			}
+		}
+		else {
+			if (network != nullptr) {
+				for (int i = 0; i < ammLayers; i++) {
+					delete[] network[i];
+				}
+				delete[] network;
+				network = nullptr;
 			}
 		}
 

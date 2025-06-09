@@ -14,7 +14,7 @@ public:
 			for (int j = 0; j < individuals; j++) {
 				if (arrIndividuals[i].getFitness() < arrChildren[j].getFitness()) {
 					arrIndividuals[i] = arrChildren[j];
-					arrChildren[j] = Tree();
+					arrChildren[j]=Tree();
 					break;
 				}
 

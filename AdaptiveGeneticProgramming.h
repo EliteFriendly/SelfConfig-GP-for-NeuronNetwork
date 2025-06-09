@@ -13,7 +13,6 @@
 class AdaptiveGeneticProgramming
 {
 private:
-	double K1;//Коэффициент используемый для подсчета пригодности, чем выше тем меньше будут деревья
 	int treeDepth;
 	Tree bestIndividual;
 	int numIndividuals;
@@ -107,7 +106,7 @@ private:
 	}
 
 public:
-	AdaptiveGeneticProgramming(double K1, int treeDepth) :K1(K1), treeDepth(treeDepth){
+	AdaptiveGeneticProgramming(int treeDepth) : treeDepth(treeDepth){
 		
 		selection = new SelectionGP*[5];
 		selection[0] = new RankedSelection;
@@ -149,7 +148,7 @@ public:
 	double getError(double** x, double *y, int size) {
 		double sum = 0;//Среднеквадратичная ошибка
 		for (int i = 0; i < size; i++) {
-			sum += pow(bestIndividual.getValue(x[i]) - y[i], 2);
+			sum += pow(bestIndividual.getValue(x[i])[0] - y[i], 2);
 		}
 		sum = pow(sum , 0.5) / double(size);
 		return sum;

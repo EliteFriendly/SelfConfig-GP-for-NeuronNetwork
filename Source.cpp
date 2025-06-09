@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-
+#include "AdaptiveGeneticProgramming.h"
 #include "Tree.h"
 
 #include <fstream>
@@ -113,51 +113,36 @@ void main() {
 	srand(10);
 	setlocale(LC_ALL, "Russian");
 	//generate train data 
-	int str = 10; //number of train data
+	int str = 100; //number of train data
 	double a = -4;
 	double b = 4;
 	double h = (b - a) / str;
 	double** trainData = new double* [str];
 	for (int i = 0; i < str; i++) {
-		trainData[i] = new double[dimension+1];
-		for (int j = 0;j < dimension; j++) {
+		trainData[i] = new double[dimension + 1];
+		for (int j = 0; j < dimension; j++) {
 			trainData[i][j] = a + h * i;
 			trainData[i][dimension] = addNoise(funcRastrigin(trainData[i]), 10);
 		}
 	}
-	//cout train data
-	//for (int i = 0; i < str; i++) {
-	//	for (int j = 0; j < dimension + 1; j++) {
-	//		cout << trainData[i][j] << ' ';
-	//	}
-	//	cout << endl;
-	//}
 
-
-	double* data = new double[1000000];
-	double* pr = new double[2]{ 1.0,2.0 };
-	for (int i = 0; i < 1000000; i++) {
-		data[i] = 2;
-
+	try {
+		AdaptiveGeneticProgramming proba(treeDepth);
+		proba.startTrain(trainData, dimension, str, 20, 20);
+		Tree best = proba.getBest();
+		cout << "Best fitness: " << best.getFitness() << endl;
+		cout << "x=" << trainData[0][0] << " y=" << best.getValue(trainData[0])[0] << endl;
+	}
+	catch (const std::exception& e) {
+		cout << "Exception caught: " << e.what() << endl;
+		exit(0);
+	}
+	catch (...) {
+		cerr << "Unknown exception caught" << endl;
+		exit(0);
 	}
 
-//
-	/*int nodes = 0, c = 2, m = 0, i = 13;
-	srand(i + c * 100000 + m * 10000);
-	Tree parent1(treeDepth, dimension, 1);
-	parent1.doNeuronNetwork();
-	nodes = 0;
 
-	Tree parent2(treeDepth, dimension, 1);
-	parent2.doNeuronNetwork();
-	nodes = 0;
-
-
-	Tree son = crossover[c]->getChild(parent1, parent2);
-	mutation[m]->doMutChild(son);
-	son.doNeuronNetwork();
-	son.trainWithDE(trainData, str);
-	son.calcFitness(trainData, str);*/
 
 
 
@@ -176,89 +161,57 @@ void main() {
 
 
 	
-	for (int c = 0; c < 4; c++) {
-		for (int m = 0; m < 2; m++) {
-			for (int i = 0; i < 1000; i++) {
-				srand(i+ c*100000+m*10000);
-				
-				try {
-					Tree parent1(treeDepth, dimension, 1);
-					parent1.doNeuronNetwork();
+	//for (int c = 0; c < 4; c++) {
+	//	for (int m = 0; m < 2; m++) {
+	//		for (int i = 0; i < 1000; i++) {
+	//			srand(i+ c*100000+m*10000);
+	//			
+	//			try {
+	//				Tree parent1(treeDepth, dimension, 1);
+	//				parent1.doNeuronNetwork();
 
-					Tree parent2(treeDepth, dimension, 1);
-					parent2.doNeuronNetwork();
+	//				Tree parent2(treeDepth, dimension, 1);
+	//				parent2.doNeuronNetwork();
 
 
-					Tree son = crossover[c]->getChild(parent1, parent2);//ÃÄÅ ÒÎ ÇÄÅÑÜ ÓÒÅ×ÊÀ
-					mutation[m]->doMutChild(son);
-					son.doNeuronNetwork();
-					son.trainWithDE(trainData, str);
-					son.calcFitness(trainData, str);
-										
-					double fitness = son.getFitness();
+	//				Tree son = crossover[c]->getChild(parent1, parent2);//ÃÄÅ ÒÎ ÇÄÅÑÜ ÓÒÅ×ÊÀ
+	//				mutation[m]->doMutChild(son);
+	//				son.doNeuronNetwork();
+	//				son.trainWithDE(trainData, str);
+	//				son.calcFitness(trainData, str);
+	//									
+	//				double fitness = son.getFitness();
 
-					if (fitness < 0 or fitness > 1 or fitness == NULL) {
-						throw invalid_argument("Fitness is NULL or less than 0 or more than 1");
-					}
-					cout << "Fitness: " << son.getFitness() << " in " << i << " cycle " << "Crossover: " << c << " Mutation: " << m << endl;
-					//cout << proba.getMatrix() << endl;
-					//cout << proba.getValue(pr)[0] << ' ';
+	//				if (fitness < 0 or fitness > 1 or fitness == NULL) {
+	//					throw invalid_argument("Fitness is NULL or less than 0 or more than 1");
+	//				}
+	//				cout << "Fitness: " << son.getFitness() << " in " << i << " cycle " << "Crossover: " << c << " Mutation: " << m << endl;
+	//				//cout << proba.getMatrix() << endl;
+	//				//cout << proba.getValue(pr)[0] << ' ';
 
-				}
-				catch (const std::exception& e) {
-					cout << "Exception caught: " << e.what() << endl;
-					cout << "with next settings:" << endl;
-					cout << "rand: " << i + c * 100000 + m * 10000 << endl;
-					cout << "Crossover: " << c << endl;
-					cout << "Mutation: " << m << endl;
-				
-					exit(0);
-				}
-				catch (...) {
-					cerr << "Unknown exception caught" << endl;
-				}
-			}
-		}
-	}
-	
+	//			}
+	//			catch (const std::exception& e) {
+	//				cout << "Exception caught: " << e.what() << endl;
+	//				cout << "with next settings:" << endl;
+	//				cout << "rand: " << i + c * 100000 + m * 10000 << endl;
+	//				cout << "Crossover: " << c << endl;
+	//				cout << "Mutation: " << m << endl;
+	//			
+	//				exit(0);
+	//			}
+	//			catch (...) {
+	//				cerr << "Unknown exception caught" << endl;
+	//			}
+	//		}
+	//	}
+	//}
+	//
 
 
     cout << "Good";
 
 
 	
-	//MutationGP* cro = new TreeMutation(3);
-	//for (int i = 0; i < 1000; i++) {
-	//	srand(i);
-	// 	
-	//	int p1 = 0;
-	//	proba1.countNodes(p1);
-	//	//cout << proba1.getFunc() << endl;
-	//	cro->doMutChild(proba1);
-	//	//cout << proba1.getFunc() << endl;
-	//	proba1.doNeuronNetwork();
-	//	//cout << proba1.getMatrix();
-	//	cout << i << endl;
-	//}
-
-
 	
-
-
-
-	
-	//srand(3);
-	//AdaptiveGeneticProgramming proba(1.2, 3);
-	//proba.startTrain(data, 2, str, 10, 7);
-	////
-	//// 
-	//// 
-	//for (int i = 0; i < str; i++) {
-	//	cout<<proba.getBest().getLabel()[i]<<endl;
-	//}
-	//for (int i = 0; i < str; i++) {
-	//	delete[] data[i];
-	//}
-	//delete[] data;
 
 }

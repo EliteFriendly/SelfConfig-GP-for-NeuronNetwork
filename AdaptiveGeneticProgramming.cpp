@@ -48,7 +48,8 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double**x,int ammThread)
 	if (ammThread == 1) {
 
 		for (int i = 0; i < numIndividuals; i++) {
-			arrayChildren[i].trainWithDE(x,  size, K1);
+			arrayChildren[i].doNeuronNetwork();
+			arrayChildren[i].trainWithDE(x,  size);
 		}
 		return;
 	}
@@ -67,11 +68,13 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double**x,int ammThread)
 
 	thr[0] = thread([&]() {
 		for (int i = 0; i < t; i++) {
-			arrayChildren[i].trainWithDE(x,  size, K1);
+			arrayChildren[i].doNeuronNetwork();
+			arrayChildren[i].trainWithDE(x, size);
 		}
 		});
 	for (int i = t; i < numIndividuals; i++) {
-		arrayChildren[i].trainWithDE(x,  size, K1);
+		arrayChildren[i].doNeuronNetwork();
+		arrayChildren[i].trainWithDE(x, size);
 	}
 	
 	thr[0].join();
@@ -206,14 +209,15 @@ void AdaptiveGeneticProgramming::startTrain(double** x, int ammInputs, int size,
 
 	//Первая иницилизация поколения
 	for (int i = 0; i < numIndividuals; i++) {
-		Tree t(treeDepth-1,ammInputs);
+		Tree t(treeDepth-1,ammInputs,1);
 		//Подсчет узлов и уровней
 		int nodes = 0, lvl = 0;
 		t.recountLayers(lvl);
 		t.countNodes(nodes);
 
 		arrayIndividuals[i] = t;
-		arrayIndividuals[i].trainWithDE(x,size, K1);
+		arrayIndividuals[i].doNeuronNetwork();
+		arrayIndividuals[i].trainWithDE(x,size);
 	}
 
 	findBest();//Первый поиск лучшего индивида
@@ -224,7 +228,7 @@ void AdaptiveGeneticProgramming::startTrain(double** x, int ammInputs, int size,
 		cout << "Номер генерации = " << i << endl;
 		setSelectionsArrays();
 		for (int j = 0; j < numIndividuals; j++) {
-			//cout << "Номер генерации = " << i <<", Номер индивида = " << j << endl;
+			cout << "Номер генерации = " << i <<", Номер индивида = " << j << endl;
 		
 			arrayChildren[j] = createChild(j);
 			//arrayChildren[j].trainWithDE(x, y, size, K1);
