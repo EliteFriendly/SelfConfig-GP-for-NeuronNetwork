@@ -54,6 +54,15 @@ public:
 		return func(best.getCoordinats());
 	}
 
-
+	~DiffEvolution() {
+		if (limitsDimension != nullptr) {
+			delete[] limitsDimension;
+			limitsDimension = nullptr;
+		}
+		if (arrIndividuals != nullptr) {
+			delete[] arrIndividuals;
+			arrIndividuals = nullptr;
+		}
+	}
 };
 

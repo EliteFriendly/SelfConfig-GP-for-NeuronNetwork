@@ -56,9 +56,14 @@ string Tree::getMatrix()
 	
 	for (int i = 0; i < ammLayers; i++) {
 		for (int j = 0; j < ammNeuron[i]; j++) {
+			
 			ss << "[" << network[i][j].getStrCoord() << "] ";
 		}
 		ss << "End" << endl;
+	}
+	ss << "Outputs"<<endl;
+	for (int i = 0; i < ammOutputs; i++) {
+		ss << "[" << output[i].getStrCoord() << "] ";
 	}
 
 
@@ -69,7 +74,7 @@ void Tree::doNeuronNetwork()
 {
 	doHiddenNeuron();//Сначала обьединяем в единую сеть все скрытые нейроны
 	int amNeuron = 0;
-	for (int i = 0; i < ammLayers; i++)//Смотрим сколько вообще нейроно в сети
+	for (int i = 0; i < ammLayers; i++)//Смотрим сколько вообще нейронов в сети
 		amNeuron += ammNeuron[i];
 
 	int* coordXOutput = new int[amNeuron];
@@ -77,26 +82,38 @@ void Tree::doNeuronNetwork()
 	int i1 = 0;//Количество нейронов где нет выхода
 	for (int i = 0; i < ammLayers; i++) {//Пробегаемся по всем потеряшками
 		for (int j = 0; j < ammNeuron[i]; j++) {
-				
-				if (!network[i][j].getOutput()) {
-					coordXOutput[i1] = i;
-					coordYOutput[i1] = j;
-					i1++;
-					network[i][j].haveOutput();
-				}
+			if (network[i][j].getUseFunc() == -1) {//Если нейрон не используется, то просто пропускаем его
+				continue;
+			}
+			if (!network[i][j].getOutput()) {
+				coordXOutput[i1] = i;
+				coordYOutput[i1] = j;
+				i1++;
+				network[i][j].haveOutput();
+			}
 			
 		}
 
 	}
 
+	if (output != nullptr) {//Если выходные нейроны уже были созданы, то удаляем их
+		delete[] output;
+	}
+
 	output = new Neuron[ammOutputs];
 
 	for (int i = 0; i < ammOutputs; i++) {//Теперь все выходы конектим к выходам
+		output[i] = Neuron(0);//Создаем выходной нейрон, который будет использовать нулевую функцию активации
 		output[i].connect(i1, coordXOutput, coordYOutput, ammLayers, i);
 	}
 
 	delete[] coordXOutput;
 	delete[] coordYOutput;
+	int nodes = 0, lvl = 0;
+	//Считаем количество узлов в дереве
+	countNodes(nodes);
+	//Считаем количество слоев в дереве
+	recountLayers(lvl);
 
 
 }
@@ -189,6 +206,24 @@ void Tree::doHiddenNeuron()
 {
 	if (lastVertice)
 		return;
+
+
+	//Освобождение памяти в случае двойного вызово функции
+	if (network != nullptr) {
+		for (int i = 0; i < ammLayers; i++) {
+			delete[] network[i];
+		}
+		delete[] network;
+		network = nullptr;
+	}
+	if (ammNeuron != nullptr) {
+		delete[] ammNeuron;
+		ammNeuron = nullptr;
+	}
+	
+
+
+
 	left->doHiddenNeuron();
 	right->doHiddenNeuron();
 	if (numberFunc == 0) {//Случай сложения узлов
@@ -197,12 +232,35 @@ void Tree::doHiddenNeuron()
 		bool leftMax = false;//Ищем тот самый узел где больше всего слоев
 		if (ammLayers == left->ammLayers)
 			leftMax = true;
-		ammNeuron = new int[ammLayers];
-		for (int i = 0; i < minLayers; i++) {//Считаем сколько нейорнов будет в каждом слое
-			ammNeuron[i] = left->ammNeuron[i] + right->ammNeuron[i];
+		
+		int L_or_RmaxNeuron = 0,Lmax=0,Rmax=0;//L_or_RmaxNeuron является максимальным количеством нейронов в бОльшей сети
+		for (int i = 0; i < ammLayers; i++) {
+			//Берем максимальное количество нейронов в каждом слое, чтобы потом создать новый массив
+			if (i < left->ammLayers) {
+				Lmax = max(left->ammNeuron[i], Lmax);
+			}	
+			if (i < right->ammLayers) {
+				Rmax = max(right->ammNeuron[i], Rmax);
+			}
+			//Если это не последний слой, то берем максимальное количество нейронов в каждом слое
+			if (leftMax) {
+				L_or_RmaxNeuron = max(left->ammNeuron[i],L_or_RmaxNeuron);
+			}
+			else {
+				L_or_RmaxNeuron = max(right->ammNeuron[i],L_or_RmaxNeuron);
+			}
+					
 		}
-		for (int i = minLayers; i < ammLayers; i++) {//Остаток, что был в большем
-			ammNeuron[i] = leftMax ? left->ammNeuron[i] : right->ammNeuron[i];
+		//Считаем сколько нейронов будет в каждом слое, 
+		//накладывая с сохранением струтктуры
+		int maxAmNeuron = max(Lmax + Rmax, maxAmNeuron);
+
+		//for (int i = 0; i < minLayers; i++) {//Считаем сколько нейорнов будет в каждом слое
+		//	ammNeuron[i] = maxAmNeuron;
+		//}
+		ammNeuron = new int[ammLayers];
+		for (int i = 0; i < ammLayers; i++) {//Остаток, что был в большем
+			ammNeuron[i] = maxAmNeuron;
 		}
 		network = new Neuron * [ammLayers];
 		for (int i = 0; i < ammLayers; i++) {//Начинаем копировать нейроны
@@ -212,24 +270,45 @@ void Tree::doHiddenNeuron()
 					if (leftMax) {
 						if (j < left->ammNeuron[i])
 							network[i][j] = left->network[i][j];
+						else if (j < L_or_RmaxNeuron)
+							network[i][j] = Neuron();//Если нейрон не заполнен, то он просто пустышка
+						else if (j >= L_or_RmaxNeuron and j < L_or_RmaxNeuron + right->ammNeuron[i])
+							network[i][j] = right->network[i][j - L_or_RmaxNeuron];
 						else
-							network[i][j] = right->network[i][j - left->ammNeuron[i]];
+							network[i][j] = Neuron();
 					}
 					else {
 						if (j < right->ammNeuron[i])
 							network[i][j] = right->network[i][j];
+						else if (j < L_or_RmaxNeuron)
+							network[i][j] = Neuron();
+						else if (j >= L_or_RmaxNeuron and j < L_or_RmaxNeuron + left->ammNeuron[i])
+							network[i][j] = left->network[i][j - L_or_RmaxNeuron];
 						else
-							network[i][j] = left->network[i][j - right->ammNeuron[i]];
+							network[i][j] = Neuron();
+
 					}
 				}
 			}
 			else {//Случай когда рассматриваем остаток
 				for (int j = 0; j < ammNeuron[i]; j++) {
 					if (leftMax) {
-						network[i][j] = left->network[i][j];
+						if (j < left->ammNeuron[i]) {
+							network[i][j] = left->network[i][j];
+						}
+						else {
+							network[i][j] = Neuron();
+						}
 					}
 					else {
-						network[i][j] = right->network[i][j];
+						if (j < right->ammNeuron[i]) {
+							network[i][j] = right->network[i][j];
+						}
+						else {
+							network[i][j] = Neuron();
+						}
+
+						
 					}
 				}
 			}
@@ -256,7 +335,12 @@ void Tree::doHiddenNeuron()
 			network[i] = new Neuron[ammNeuron[i]];
 			if (i < left->ammLayers) {
 				for (int j = 0; j < ammNeuron[i]; j++) {
+					
 					network[i][j] = left->network[i][j];
+
+					if (left->network[i][j].getUseFunc() == -1) {
+						continue;
+					}
 					if (!network[i][j].getOutput()) {
 						coordXOutput[i1] = i;
 						coordYOutput[i1] = j;
@@ -267,7 +351,12 @@ void Tree::doHiddenNeuron()
 			}
 			else {
 				for (int j = 0; j < ammNeuron[i]; j++) {
-					network[i][j] = right->network[i-left->ammLayers][j];
+
+					network[i][j] = right->network[i - left->ammLayers][j];
+
+					if (right->network[i - left->ammLayers][j].getUseFunc() == -1) {
+						continue;
+					}
 					if (!network[i][j].getInput()) {
 						network[i][j].connect(i1, coordXOutput, coordYOutput, i, j);
 					}
@@ -282,20 +371,20 @@ void Tree::doHiddenNeuron()
 
 void Tree::changeCoef(double *coef)
 {
-	//Тут заполняется ТОЛЬКО нерйонная сеть
+	//Тут заполняется ТОЛЬКО нейронная сеть
 	int cursor = 0;//Это будет динамически меняться в каждом нейроне
 	for (int i = 0; i < ammLayers; i++) {
 		for (int j = 0; j < ammNeuron[i]; j++) {
 			network[i][j].setCoefficients(coef, cursor);
 		}
 	}
-	//Теперь заполняем выходные значения, или те что выходые нейроны
+	//Теперь заполняем выходные значения, или те что выходные нейроны
 	for (int i = 0; i < ammOutputs; i++) {
 		output[i].setCoefficients(coef, cursor);
 	}
 }
 
-double Tree::getNumVertices()
+int Tree::getNumVertices()
 {
 
 	if (lastVertice) {
@@ -331,6 +420,12 @@ double* Tree::getValue(double* x)
 				res[i][j] = x[network[i][j].getUseFunc()];//Просто берем значение из входного массива
 				continue;
 			}
+			if (network[i][j].getUseFunc() == -1) {
+				//Если нейрон не используется, то просто заполняем его нулем
+				res[i][j] = 0;
+				continue;
+			}
+			//В случае если это обычный нейрон, то заполняем его входные значения
 			double* input = new double[network[i][j].getAmountInp()];//Заполняется элементами, которые будут подаваться на вход в нейрон
 			for (int w = 0; w < network[i][j].getAmountInp(); w++) {
 				input[w] = res[i + network[i][j].getCoord()[w][0]][j + network[i][j].getCoord()[w][1]];
@@ -453,12 +548,12 @@ void Tree::trainWithDE(double** x, int size)
 
 
 	DiffEvolution DE(func, limits, amCoefficients, "targetToBest1", "max");
-	DE.startSearch(0.01, 0.5, 0.5, 50, 50);
+	DE.startSearch(0.01, 0.5, 0.5, 10, 10);
 	int i = 0;
 	double* coef = DE.getBestCoordinates();
 	changeCoef(coef);
 	calcFitness(x, size);
-
+	delete[] limits;
 
 
 }

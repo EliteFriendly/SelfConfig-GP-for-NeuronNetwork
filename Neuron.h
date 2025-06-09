@@ -5,12 +5,13 @@
 using namespace std;
 class Neuron
 {
+
 	//Здесь находятся связи с узлами относительно нейрона
 	int** input = nullptr;//Координаты входящих узлов
 	bool output = false;//Есть ли выходные узлы
 	int amountInp = 0;//Только количество входов
 	
-	int useFunc = NULL;//Номер используемой функции, или входа(от 0)
+	int useFunc = -1;//Номер используемой функции, или входа(от 0), -1 значит нейрон не используется
 	bool inputBranch = false;//Находится ли в ветви входа
 
 	double* coefficients = nullptr;//Коэффициенты вместе со свободным
@@ -54,12 +55,19 @@ public:
 	Neuron(int useFunc):useFunc(useFunc){};
 	
 	void setCoefficients(double* coef, int& cursor) {
-		coefficients = new double[amountInp + 1];
+		if (useFunc == -1) {//Если нейрон не используется, то не нужно заполнять коэффициенты
+			coefficients = nullptr;
+			return;
+		}
+		if (coefficients == nullptr) {//Если уже были коэффициенты, то удаляем их
+			coefficients = new double[amountInp + 1];
+		}
+		
 		for (int i = 0; i < amountInp + 1; i++) {
 			coefficients[i] = coef[i + cursor];
 
 		}
-		cursor += amountInp + 1;//???????? Возможно ошибка, ибо курсор может захватывать часть другого нейрона
+		cursor += amountInp + 1;
 	}
 
 	double getValue(function <double(double)> &funcActivation, double* inputs) {
@@ -86,6 +94,12 @@ public:
 
 	void connect(int amount,int* xOutputs, int* yOutputs, int x, int y)//Вводить х и у те, относительно коннекчущего узла
 	{
+		if (useFunc == -1) {
+			throw logic_error("Нейрон не используется, не может быть подключен к другим узлам");
+			exit(0);
+		}
+
+
 		if (input == nullptr) {//РАссмотрен случай когда справа ТОЧНО не окажется входящих узлов
 			input = new int* [amount];
 			Neuron::amountInp = amount;
@@ -101,6 +115,8 @@ public:
 		}
 	}
 	string getStrCoord() {
+		if (useFunc == -1)
+			return "S";//Означает что нейрон не используется, т.е. Shadow - тень
 		stringstream ss;
 		if (input == nullptr) {
 			ss << " nullptr ";
@@ -123,6 +139,9 @@ public:
 		}
 		return true;
 	}
+	double* getCoefficients() {
+		return coefficients;
+	}
 	void haveOutput() { output = true; }
 	~Neuron() {
 		if (input != nullptr) {
@@ -140,6 +159,11 @@ public:
 			
 		}
 		input = nullptr;
+		if (coefficients != nullptr) {
+			delete[] coefficients;
+			
+		}
+		coefficients = nullptr;
 	}
 	Neuron operator = (const Neuron& copy) {
 		output = copy.output;

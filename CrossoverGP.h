@@ -193,7 +193,7 @@ class StandartCrossover : public CrossoverGP {
 
 
 		}
-		//Замена у ребенка выбраного узла у первого и второго родителя
+		//Замена у ребенка выбранного узла у первого и второго родителя
 		child.replaceNode(chosenNode, *nodeParent);
 		//Используется чтобы пронумеровать все узлы
 		int z = 0, lvl = 0;

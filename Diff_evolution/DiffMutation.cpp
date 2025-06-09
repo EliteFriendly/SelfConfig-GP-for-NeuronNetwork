@@ -67,5 +67,7 @@ IndividualDiffEvolution DiffMutation::getDonor(IndividualDiffEvolution* arrIndiv
 
 
     outLimits(donor);
+	delete[] selectedInd;
+	selectedInd = nullptr;
     return donor;
 }

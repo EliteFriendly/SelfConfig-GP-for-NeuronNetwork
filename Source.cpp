@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include "MutationGP.h"
+#include "CrossoverGP.h"
 #include <time.h>
 #include <fstream>
 using namespace std;
@@ -60,7 +61,7 @@ double funcRosenbrock(double* x) {
 
 
 *Из за чего алгоритм может перестать работать:
-
+Изменен способ копирования веток
 
 *Что нужно изменить:
 
@@ -98,11 +99,21 @@ double addNoise(double x, int power) {
 //Все нейроны 7 типа!!!!!!!!
 
 void main() {
+	int treeDepth = 5; //depth of tree
+	CrossoverGP** crossover = new CrossoverGP * [4];
+	crossover[0] = new EmptyCrossover();
+	crossover[1] = new UniformCrossover();
+	crossover[2] = new StandartCrossover();
+	crossover[3] = new OnepointCrossover();
+
+	MutationGP** mutation = new MutationGP * [2];
+	mutation[0] = new PointMutation("Average");
+	mutation[1] = new TreeMutation(treeDepth);
 	//do array from 1 to 100
 	srand(10);
 	setlocale(LC_ALL, "Russian");
 	//generate train data 
-	int str = 50; //number of train data
+	int str = 10; //number of train data
 	double a = -4;
 	double b = 4;
 	double h = (b - a) / str;
@@ -130,55 +141,89 @@ void main() {
 
 	}
 
-	//srand(4);
-	//Tree proba1(rand() % 4 + 2, dimension, 1);
-	//proba1.doNeuronNetwork();
-	//cout << proba1.getMatrix() << endl;
-	//proba1.trainWithDE(trainData, str);
-	//proba1.calcFitness(trainData, str);
-	//cout << "Fitness END: " << proba1.getFitness() << endl;
+//
+	/*int nodes = 0, c = 2, m = 0, i = 13;
+	srand(i + c * 100000 + m * 10000);
+	Tree parent1(treeDepth, dimension, 1);
+	parent1.doNeuronNetwork();
+	nodes = 0;
 
-	//cout << proba1.getValue(pr)[0] << ' ';
-
-	/*srand(109);
-	Tree proba(rand() % 2 + 2, dimension, 1);
-	proba.doNeuronNetwork();
-	proba.trainWithDE(trainData, str);
-	proba.calcFitness(trainData, str);
+	Tree parent2(treeDepth, dimension, 1);
+	parent2.doNeuronNetwork();
+	nodes = 0;
 
 
-	cout << "Fitness END: " << proba.getFitness() << endl;
-	cout << proba.getMatrix() << endl;*/
+	Tree son = crossover[c]->getChild(parent1, parent2);
+	mutation[m]->doMutChild(son);
+	son.doNeuronNetwork();
+	son.trainWithDE(trainData, str);
+	son.calcFitness(trainData, str);*/
 
 
+
+
+
+
+
+	
+
+	cout.precision(6);
 
 	//do stress test
+	//Stess test with all mutations and crossover
+
+
+
+
 	
-	for (int i = 0; i < 400; i++) {
-		srand(i);
-		try {
-			Tree proba(rand()%4+2, dimension, 1);
-			proba.doNeuronNetwork();
-			proba.trainWithDE(trainData, str);
-			proba.calcFitness(trainData, str);
-			cout << "Fitness: " << proba.getFitness()<<" in "<< i <<" cycle" << endl;
-			//cout << proba.getMatrix() << endl;
-			//cout << proba.getValue(pr)[0] << ' ';
-		}
-		catch (const std::exception& e) {
-			cout << "Exception caught: " << e.what() << endl;
-			cout << "with next settings:" << endl;
-			cout << "i: " << i << endl;
-			cout << "rand: " << rand() % 4 + 2 << endl;
-			
-		}
-		catch (...) {
-			cerr << "Unknown exception caught" << endl;
+	for (int c = 0; c < 4; c++) {
+		for (int m = 0; m < 2; m++) {
+			for (int i = 0; i < 1000; i++) {
+				srand(i+ c*100000+m*10000);
+				
+				try {
+					Tree parent1(treeDepth, dimension, 1);
+					parent1.doNeuronNetwork();
+
+					Tree parent2(treeDepth, dimension, 1);
+					parent2.doNeuronNetwork();
+
+
+					Tree son = crossover[c]->getChild(parent1, parent2);//ГДЕ ТО ЗДЕСЬ УТЕЧКА
+					mutation[m]->doMutChild(son);
+					son.doNeuronNetwork();
+					son.trainWithDE(trainData, str);
+					son.calcFitness(trainData, str);
+										
+					double fitness = son.getFitness();
+
+					if (fitness < 0 or fitness > 1 or fitness == NULL) {
+						throw invalid_argument("Fitness is NULL or less than 0 or more than 1");
+					}
+					cout << "Fitness: " << son.getFitness() << " in " << i << " cycle " << "Crossover: " << c << " Mutation: " << m << endl;
+					//cout << proba.getMatrix() << endl;
+					//cout << proba.getValue(pr)[0] << ' ';
+
+				}
+				catch (const std::exception& e) {
+					cout << "Exception caught: " << e.what() << endl;
+					cout << "with next settings:" << endl;
+					cout << "rand: " << i + c * 100000 + m * 10000 << endl;
+					cout << "Crossover: " << c << endl;
+					cout << "Mutation: " << m << endl;
+				
+					exit(0);
+				}
+				catch (...) {
+					cerr << "Unknown exception caught" << endl;
+				}
+			}
 		}
 	}
+	
 
 
-
+    cout << "Good";
 
 
 	
