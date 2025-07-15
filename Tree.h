@@ -72,8 +72,8 @@ private:
 
 	//Связано с пригодностью
 	double ef = 1;//Коэффициент при RMSE
-	double nf = 5;//Коэффициент при количестве узлов
-	int maxNodes = 50;//Максимальное количество узлов в дереве
+	double nf = 0;//Коэффициент при количестве узлов
+	int maxNodes = 100;//Максимальное количество узлов в дереве
 
 
 	int* ammNeuron = nullptr;//Количество узлов в слое
@@ -234,7 +234,7 @@ public:
 
 	Tree(int d, int numInputs, int numOutputs);
 
-	void calcFitness(double** x, int size);
+	void calcFitness(double** x, int size, string typeTask);
 
 	string getMatrix();
 

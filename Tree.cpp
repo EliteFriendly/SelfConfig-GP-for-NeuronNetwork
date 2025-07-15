@@ -27,22 +27,43 @@ void Tree::recountLayers(int level)
 }
 
 
-void Tree::calcFitness(double** x, int size)
+void Tree::calcFitness(double** x, int size,string typeTask)//typeTask = "reg" or "class"
 {
 	//calculated a RMSE
-	double RMSE = 0;
-	for (int i = 0; i < size; i++) {
-		double* res = getValue(x[i]);//Получаем значение нейронной сети для каждого входа
-		for (int j = 0; j < ammOutputs; j++) {
-			RMSE += pow(res[j] - x[i][ammInputs + j], 2);//Считаем MSE
-		}
-		delete[] res;
+	if (typeTask == "reg") {
+		double RMSE = 0;
+		for (int i = 0; i < size; i++) {
+			double* res = getValue(x[i]);//Получаем значение нейронной сети для каждого входа
+			for (int j = 0; j < ammOutputs; j++) {
+				RMSE += pow(res[j] - x[i][ammInputs + j], 2);//Считаем MSE
+			}
+			delete[] res;
 
+
+		}
+		RMSE = sqrt(RMSE / (ammOutputs * size));//Считаем RMSE
+		fitness = 1 / (1 + ef * RMSE + nf * numNodes / maxNodes);//Считаем фитнес, где ef - коэффициент при RMSE, nf - коэффициент при количестве узлов, maxNodes - максимальное количество узлов в дереве
 
 	}
-	RMSE = sqrt(RMSE / (ammOutputs * size));//Считаем RMSE
-	fitness = 1 / (1 + ef * RMSE + nf * numNodes / maxNodes);//Считаем фитнес, где ef - коэффициент при RMSE, nf - коэффициент при количестве узлов, maxNodes - максимальное количество узлов в дереве
-
+	//calculated a accuracy
+	else if (typeTask == "class") {
+		int correct = 0;
+		for (int i = 0; i < size; i++) {
+			double* res = getValue(x[i]);//Получаем значение нейронной сети для каждого входа
+			int maxIndex = 0;
+			for (int j = 1; j < ammOutputs; j++) {//Ищем индекс максимального значения
+				if (res[j] > res[maxIndex]) {
+					maxIndex = j;
+				}
+			}
+			if (maxIndex == x[i][ammInputs]) {//Если индекс совпадает с классом, то увеличиваем счетчик
+				correct++;
+			}
+			delete[] res;
+		}
+		fitness = double(correct) / size;//Считаем фитнес, где size - количество элементов в выборке
+	}
+	
 
 	if (fitness == NULL) {
 		throw invalid_argument("Fitness is NULL");

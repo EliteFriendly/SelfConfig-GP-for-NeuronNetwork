@@ -13,6 +13,7 @@
 class AdaptiveGeneticProgramming
 {
 private:
+	string typeTask;//Либо "reg" либо "class"
 	int treeDepth;
 	Tree bestIndividual;
 	int numIndividuals;
@@ -107,7 +108,7 @@ private:
 	}
 
 public:
-	AdaptiveGeneticProgramming(int treeDepth) : treeDepth(treeDepth){
+	AdaptiveGeneticProgramming(int treeDepth, string typeTask) : treeDepth(treeDepth),typeTask(typeTask){
 		
 		selection = new SelectionGP*[5];
 		selection[0] = new RankedSelection;
@@ -157,6 +158,16 @@ public:
 		sum = pow(sum / (ammOutputs * size), 0.5); //Среднеквадратичная ошибка
 		return sum;
 
+	}
+	double classificationError(double** x, int size) {
+		int count = 0;
+		for (int i = 0; i < size; i++) {
+			double* res = bestIndividual.getValue(x[i]);
+			if (abs(round(res[0]) - x[i][ammInputs]) ==0) {
+				count++;
+			}
+		}
+		return double(count) / size;
 	}
 
 	void numFile(int num) {

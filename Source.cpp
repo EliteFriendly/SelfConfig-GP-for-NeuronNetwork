@@ -9,7 +9,7 @@
 #include <time.h>
 #include <fstream>
 using namespace std;
-int dimension = 1;
+int dimension = 4;
 const double PI = 3.1415926535;
 
 double func0(double x) {
@@ -99,7 +99,30 @@ double addNoise(double x, int power) {
 //Все нейроны 7 типа!!!!!!!!
 
 void main() {
-	int treeDepth = 5; //depth of tree
+
+
+	//Download database Iris
+	ifstream file("Iris.txt");
+	if (!file.is_open()) {
+		cerr << "Error opening file" << endl;
+		exit(1);
+	}
+	//Read data from file
+	double** data = new double* [150];
+	for (int i = 0; i < 150; i++) {
+		data[i] = new double[5];
+		for (int j = 0; j < 5; j++) {
+			file >> data[i][j];
+			if (file.peek() == ',') {
+				file.ignore();
+			}
+		}
+	}
+
+
+
+
+	int treeDepth = 3; //depth of tree
 	int amOutputs = 1; //number of outputs
 	CrossoverGP** crossover = new CrossoverGP * [4];
 	crossover[0] = new EmptyCrossover();
@@ -114,8 +137,8 @@ void main() {
 	srand(10);
 	setlocale(LC_ALL, "Russian");
 	//generate train data 
-	int str = 100; //number of train data
-	double a = -4;
+	int str = 150; //number of train data
+	/*double a = -4;
 	double b = 4;
 	double h = (b - a) / str;
 	double** trainData = new double* [str];
@@ -125,14 +148,15 @@ void main() {
 			trainData[i][j] = a + h * i;
 			trainData[i][dimension] = addNoise(funcRastrigin(trainData[i]), 10);
 		}
-	}
+	}*/
 
 	try {
 		AdaptiveGeneticProgramming proba(treeDepth);
-		proba.startTrain(trainData, dimension,amOutputs, str, 20, 20);
+		proba.startTrain(data, dimension,amOutputs, str, 20, 20);
 		Tree best = proba.getBest();
 		cout << "Best fitness: " << best.getFitness() << endl;
-		cout << "Error: " << proba.getError(trainData, str) << endl;
+		cout << "Error: " << proba.classificationError(data, str) << endl;
+		proba.saveBestIndividualtoFile();
 	}
 	catch (const std::exception& e) {
 		cout << "Exception caught: " << e.what() << endl;
@@ -156,7 +180,7 @@ void main() {
 	cout.precision(6);
 
 	//do stress test
-	//Stess test with all mutations and crossover
+	//Stress test with all mutations and crossover
 
 
 
