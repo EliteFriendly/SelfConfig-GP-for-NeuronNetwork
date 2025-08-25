@@ -1,11 +1,11 @@
 #pragma once
 #pragma once
 #include <iostream>
-#include<vector>
-#include<functional>
+#include <vector>
+#include <functional>
 #include "MutationGP.h"
-#include"CrossoverGP.h"
-#include"Tree.h"
+#include "CrossoverGP.h"
+#include "..\\neuron_network\\Tree.h"
 class FormingGP
 {
 public:

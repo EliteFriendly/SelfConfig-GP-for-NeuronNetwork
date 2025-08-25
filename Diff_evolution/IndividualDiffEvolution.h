@@ -7,10 +7,10 @@ using namespace std;
 class IndividualDiffEvolution
 {
 private:
-	double* coordinats = nullptr;//Координаты индивида
-	double* limitsDimension = nullptr;//Ограничение на каждую ось
-	double acc;//Точность поиска точки
-	double fitness;//Значение пригодности
+	double* coordinats = nullptr;//РљРѕРѕСЂРґРёРЅР°С‚С‹ РёРЅРґРёРІРёРґР°
+	double* limitsDimension = nullptr;//РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РєР°Р¶РґСѓСЋ РѕСЃСЊ
+	double acc;//РўРѕС‡РЅРѕСЃС‚СЊ РїРѕРёСЃРєР° С‚РѕС‡РєРё
+	double fitness;//Р—РЅР°С‡РµРЅРёРµ РїСЂРёРіРѕРґРЅРѕСЃС‚Рё
 	function<double(double*)> func;
 	string aim;
 	int ammDimen;

@@ -6,15 +6,15 @@ using namespace std;
 class Neuron
 {
 
-	//Здесь находятся связи с узлами относительно нейрона
-	int** input = nullptr;//Координаты входящих узлов
-	bool output = false;//Есть ли выходные узлы
-	int amountInp = 0;//Только количество входов
+	//Р—РґРµСЃСЊ РЅР°С…РѕРґСЏС‚СЃСЏ СЃРІСЏР·Рё СЃ СѓР·Р»Р°РјРё РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РЅРµР№СЂРѕРЅР°
+	int** input = nullptr;//РљРѕРѕСЂРґРёРЅР°С‚С‹ РІС…РѕРґСЏС‰РёС… СѓР·Р»РѕРІ
+	bool output = false;//Р•СЃС‚СЊ Р»Рё РІС‹С…РѕРґРЅС‹Рµ СѓР·Р»С‹
+	int amountInp = 0;//РўРѕР»СЊРєРѕ РєРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕРґРѕРІ
 	
-	int useFunc = -1;//Номер используемой функции, или входа(от 0), -1 значит нейрон не используется
-	bool inputBranch = false;//Находится ли в ветви входа
+	int useFunc = -1;//РќРѕРјРµСЂ РёСЃРїРѕР»СЊР·СѓРµРјРѕР№ С„СѓРЅРєС†РёРё, РёР»Рё РІС…РѕРґР°(РѕС‚ 0), -1 Р·РЅР°С‡РёС‚ РЅРµР№СЂРѕРЅ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+	bool inputBranch = false;//РќР°С…РѕРґРёС‚СЃСЏ Р»Рё РІ РІРµС‚РІРё РІС…РѕРґР°
 
-	double* coefficients = nullptr;//Коэффициенты вместе со свободным
+	double* coefficients = nullptr;//РљРѕСЌС„С„РёС†РёРµРЅС‚С‹ РІРјРµСЃС‚Рµ СЃРѕ СЃРІРѕР±РѕРґРЅС‹Рј
 
 public:
 	Neuron() {};
@@ -55,11 +55,11 @@ public:
 	Neuron(int useFunc):useFunc(useFunc){};
 	
 	void setCoefficients(double* coef, int& cursor) {
-		if (useFunc == -1) {//Если нейрон не используется, то не нужно заполнять коэффициенты
+		if (useFunc == -1) {//Р•СЃР»Рё РЅРµР№СЂРѕРЅ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, С‚Рѕ РЅРµ РЅСѓР¶РЅРѕ Р·Р°РїРѕР»РЅСЏС‚СЊ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹
 			coefficients = nullptr;
 			return;
 		}
-		if (coefficients == nullptr) {//Если уже были коэффициенты, то удаляем их
+		if (coefficients == nullptr) {//Р•СЃР»Рё СѓР¶Рµ Р±С‹Р»Рё РєРѕСЌС„С„РёС†РёРµРЅС‚С‹, С‚Рѕ СѓРґР°Р»СЏРµРј РёС…
 			coefficients = new double[amountInp + 1];
 		}
 		
@@ -78,6 +78,7 @@ public:
 		for (int i = 0; i < amountInp; i++) {
 			sum += coefficients[i] * inputs[i];
 		}
+
 		sum += coefficients[amountInp];
 		return funcActivation(sum);
 	}
@@ -92,15 +93,15 @@ public:
 		return amountInp;
 	}
 
-	void connect(int amount,int* xOutputs, int* yOutputs, int x, int y)//Вводить х и у те, относительно коннекчущего узла
+	void connect(int amount,int* xOutputs, int* yOutputs, int x, int y)//Р’РІРѕРґРёС‚СЊ С… Рё Сѓ С‚Рµ, РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РєРѕРЅРЅРµРєС‡СѓС‰РµРіРѕ СѓР·Р»Р°
 	{
 		if (useFunc == -1) {
-			throw logic_error("Нейрон не используется, не может быть подключен к другим узлам");
+			throw logic_error("РќРµР№СЂРѕРЅ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїРѕРґРєР»СЋС‡РµРЅ Рє РґСЂСѓРіРёРј СѓР·Р»Р°Рј");
 			exit(0);
 		}
 
 
-		if (input == nullptr) {//РАссмотрен случай когда справа ТОЧНО не окажется входящих узлов
+		if (input == nullptr) {//Р РђСЃСЃРјРѕС‚СЂРµРЅ СЃР»СѓС‡Р°Р№ РєРѕРіРґР° СЃРїСЂР°РІР° РўРћР§РќРћ РЅРµ РѕРєР°Р¶РµС‚СЃСЏ РІС…РѕРґСЏС‰РёС… СѓР·Р»РѕРІ
 			input = new int* [amount];
 			Neuron::amountInp = amount;
 			for (int i = 0; i < amount; i++) {
@@ -110,13 +111,13 @@ public:
 			}
 		}
 		else {
-			cout << endl << "Ошибка коннекта";
+			cout << endl << "РћС€РёР±РєР° РєРѕРЅРЅРµРєС‚Р°";
 			exit(0);
 		}
 	}
 	string getStrCoord() {
 		if (useFunc == -1)
-			return "S";//Означает что нейрон не используется, т.е. Shadow - тень
+			return "S";//РћР·РЅР°С‡Р°РµС‚ С‡С‚Рѕ РЅРµР№СЂРѕРЅ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, С‚.Рµ. Shadow - С‚РµРЅСЊ
 		stringstream ss;
 		if (input == nullptr) {
 			ss << " nullptr ";

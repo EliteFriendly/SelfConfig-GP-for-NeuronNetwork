@@ -8,14 +8,14 @@ using namespace std;
 class DiffMutation
 {
 private:
-	string type;//Тип мутации
-	int* selectedInd = nullptr;//Номера выбранных индивидов
-	double F;//Масштабирующий фактор
-	int ammount;//Количество родителей в донор векторе
-	double* limitsDimension = nullptr;//Ограничение на каждую ось
-	int ammDimens;//Количество пространств
+	string type;//РўРёРї РјСѓС‚Р°С†РёРё
+	int* selectedInd = nullptr;//РќРѕРјРµСЂР° РІС‹Р±СЂР°РЅРЅС‹С… РёРЅРґРёРІРёРґРѕРІ
+	double F;//РњР°СЃС€С‚Р°Р±РёСЂСѓСЋС‰РёР№ С„Р°РєС‚РѕСЂ
+	int ammount;//РљРѕР»РёС‡РµСЃС‚РІРѕ СЂРѕРґРёС‚РµР»РµР№ РІ РґРѕРЅРѕСЂ РІРµРєС‚РѕСЂРµ
+	double* limitsDimension = nullptr;//РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РєР°Р¶РґСѓСЋ РѕСЃСЊ
+	int ammDimens;//РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІ
 
-	void outLimits(IndividualDiffEvolution);//Проверка вышел ли индивид за границы
+	void outLimits(IndividualDiffEvolution);//РџСЂРѕРІРµСЂРєР° РІС‹С€РµР» Р»Рё РёРЅРґРёРІРёРґ Р·Р° РіСЂР°РЅРёС†С‹
 public:
 	void setF(double F) {
 		DiffMutation::F = F;
@@ -36,14 +36,15 @@ public:
 			ammount = 4;
 		}
 		if (type == "targetToRand1") {
-			ammount = 4;//Включая i - тый вектор
+			ammount = 4;//Р’РєР»СЋС‡Р°СЏ i - С‚С‹Р№ РІРµРєС‚РѕСЂ
 		}
 		if (type == "targetToBest1") {
-			ammount = 3;//Включая i - тый вектор
+			ammount = 3;//Р’РєР»СЋС‡Р°СЏ i - С‚С‹Р№ РІРµРєС‚РѕСЂ
 		}
 	}
 	void setLimits(double* limits, int ammDimens) {
-		limitsDimension = new double[ammDimens * 2];
+        DiffMutation::ammDimens = ammDimens;
+        limitsDimension = new double[ammDimens * 2];
 		for (int i = 0; i < ammDimens * 2; i++) {
 			limitsDimension[i] = limits[i];
 		}

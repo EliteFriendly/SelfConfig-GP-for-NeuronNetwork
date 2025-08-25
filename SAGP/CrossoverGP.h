@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "Tree.h"
+#include "..\\neuron_network\\Tree.h"
 #include <vector>
 #include <random>
 using namespace std;
@@ -9,7 +9,7 @@ class CrossoverGP
 {
 protected:
 
-	int* arrayReach = nullptr;//0 - недостижима 1 - достижима
+	int* arrayReach = nullptr;//0 - РЅРµРґРѕСЃС‚РёР¶РёРјР° 1 - РґРѕСЃС‚РёР¶РёРјР°
 	void findReach(Tree& first, Tree& second) {
 
 		int ammNodes = first.getNumNodes();
@@ -26,47 +26,47 @@ protected:
 		}
 		for (int i = 0; i < ammNodes; i++) {
 
-			//Проверяем каждый узел на то, что он будет достижим
+			//РџСЂРѕРІРµСЂСЏРµРј РєР°Р¶РґС‹Р№ СѓР·РµР» РЅР° С‚Рѕ, С‡С‚Рѕ РѕРЅ Р±СѓРґРµС‚ РґРѕСЃС‚РёР¶РёРј
 
 			Tree* node1 = &first;
 			Tree* node2 = &second;
 			/*
-			Если узел что мы ищем уже был проверен, то его пропускаем
+			Р•СЃР»Рё СѓР·РµР» С‡С‚Рѕ РјС‹ РёС‰РµРј СѓР¶Рµ Р±С‹Р» РїСЂРѕРІРµСЂРµРЅ, С‚Рѕ РµРіРѕ РїСЂРѕРїСѓСЃРєР°РµРј
 			*/
 			while (arrayReach[i] == 0) {
 				/*
-					Отсчет узлов начинается слева, тем самым мы проверяем если выбранный узел больше
-				первого узла слева, то значит выбранный узел точно правее и наоборот
+					РћС‚СЃС‡РµС‚ СѓР·Р»РѕРІ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃР»РµРІР°, С‚РµРј СЃР°РјС‹Рј РјС‹ РїСЂРѕРІРµСЂСЏРµРј РµСЃР»Рё РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» Р±РѕР»СЊС€Рµ
+				РїРµСЂРІРѕРіРѕ СѓР·Р»Р° СЃР»РµРІР°, С‚Рѕ Р·РЅР°С‡РёС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» С‚РѕС‡РЅРѕ РїСЂР°РІРµРµ Рё РЅР°РѕР±РѕСЂРѕС‚
 
 				*/
 				if (node1->getNumNodes() == i) {
-					//Если узел был достигнут, то изменяем значение в массиве
+					//Р•СЃР»Рё СѓР·РµР» Р±С‹Р» РґРѕСЃС‚РёРіРЅСѓС‚, С‚Рѕ РёР·РјРµРЅСЏРµРј Р·РЅР°С‡РµРЅРёРµ РІ РјР°СЃСЃРёРІРµ
 					arrayReach[node1->getNumNodes()] = 1;
 					break;
 				}
 				if (node1->getLeft() != nullptr and i <= node1->getLeft()->getNumNodes()) {
-					//Проверка что оба узла хранят одну функцию
+					//РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РѕР±Р° СѓР·Р»Р° С…СЂР°РЅСЏС‚ РѕРґРЅСѓ С„СѓРЅРєС†РёСЋ
 					if ((node1->getLastVertice() == node2->getLastVertice())) {
-						node1 = node1->getLeft();//Идем по маршруту и там и сям
+						node1 = node1->getLeft();//РРґРµРј РїРѕ РјР°СЂС€СЂСѓС‚Сѓ Рё С‚Р°Рј Рё СЃСЏРј
 						node2 = node2->getLeft();
-						arrayReach[node1->getNumNodes()] = 1;//Пройденный узел отмечаем
+						arrayReach[node1->getNumNodes()] = 1;//РџСЂРѕР№РґРµРЅРЅС‹Р№ СѓР·РµР» РѕС‚РјРµС‡Р°РµРј
 						continue;
 					}
 					else {
-						//Если оказался 1 узел последний
+						//Р•СЃР»Рё РѕРєР°Р·Р°Р»СЃСЏ 1 СѓР·РµР» РїРѕСЃР»РµРґРЅРёР№
 						if (node1->getLastVertice() or node2->getLastVertice()) {
-							arrayReach[node1->getNumNodes()] = 1;//Данный последний узел достижим
-							arrayReach[i] = 0;//А искомый - нет
+							arrayReach[node1->getNumNodes()] = 1;//Р”Р°РЅРЅС‹Р№ РїРѕСЃР»РµРґРЅРёР№ СѓР·РµР» РґРѕСЃС‚РёР¶РёРј
+							arrayReach[i] = 0;//Рђ РёСЃРєРѕРјС‹Р№ - РЅРµС‚
 							break;
 						}
-						else {//Если не совпали
+						else {//Р•СЃР»Рё РЅРµ СЃРѕРІРїР°Р»Рё
 
-							//Вдруг узел справа окажется тем самым
+							//Р’РґСЂСѓРі СѓР·РµР» СЃРїСЂР°РІР° РѕРєР°Р¶РµС‚СЃСЏ С‚РµРј СЃР°РјС‹Рј
 							if (node1->getRight()->getNumNodes() == i) {
 								arrayReach[i] = 1;
 								break;
 							}
-							else {//Иначе говорим что правый достижим
+							else {//РРЅР°С‡Рµ РіРѕРІРѕСЂРёРј С‡С‚Рѕ РїСЂР°РІС‹Р№ РґРѕСЃС‚РёР¶РёРј
 								arrayReach[node1->getRight()->getNumNodes()] = 1;
 								break;
 							}
@@ -76,7 +76,7 @@ protected:
 
 
 				}
-				//Аналогично но справа
+				//РђРЅР°Р»РѕРіРёС‡РЅРѕ РЅРѕ СЃРїСЂР°РІР°
 				if (node1->getRight() != nullptr and i <= node1->getRight()->getNumNodes()) {
 					if ((node1->getLastVertice() == node2->getLastVertice())) {
 						node1 = node1->getRight();
@@ -122,7 +122,7 @@ protected:
 			return rand() % (secNode + 1);//????
 		}
 		else {
-			secNode = second.getRight()->getNumNodes() - second.getLeft()->getNumNodes();//Чтобы узнать сколько узлов в правой ветке
+			secNode = second.getRight()->getNumNodes() - second.getLeft()->getNumNodes();//Р§С‚РѕР±С‹ СѓР·РЅР°С‚СЊ СЃРєРѕР»СЊРєРѕ СѓР·Р»РѕРІ РІ РїСЂР°РІРѕР№ РІРµС‚РєРµ
 			return rand() % (secNode)+second.getLeft()->getNumNodes() + 1;
 		}
 
@@ -172,11 +172,11 @@ class StandartCrossover : public CrossoverGP {
 		if (chosenNode <= child.getLeft()->getNumNodes()) {
 			chosenInputBranch = true;
 		}
-		//Выбор рандомного узла для 2 родителя
+		//Р’С‹Р±РѕСЂ СЂР°РЅРґРѕРјРЅРѕРіРѕ СѓР·Р»Р° РґР»СЏ 2 СЂРѕРґРёС‚РµР»СЏ
 		int chosenNode2 = ruleReplace(chosenNode,chosenInputBranch,second);
 		Tree* nodeParent = &second;
 		bool t = false;
-		//Начало спуска до этого узла
+		//РќР°С‡Р°Р»Рѕ СЃРїСѓСЃРєР° РґРѕ СЌС‚РѕРіРѕ СѓР·Р»Р°
 		while (t == false) {
 			if (nodeParent->getNumNodes() == chosenNode2) {
 				t = true;
@@ -193,9 +193,9 @@ class StandartCrossover : public CrossoverGP {
 
 
 		}
-		//Замена у ребенка выбранного узла у первого и второго родителя
+		//Р—Р°РјРµРЅР° Сѓ СЂРµР±РµРЅРєР° РІС‹Р±СЂР°РЅРЅРѕРіРѕ СѓР·Р»Р° Сѓ РїРµСЂРІРѕРіРѕ Рё РІС‚РѕСЂРѕРіРѕ СЂРѕРґРёС‚РµР»СЏ
 		child.replaceNode(chosenNode, *nodeParent);
-		//Используется чтобы пронумеровать все узлы
+		//РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ С‡С‚РѕР±С‹ РїСЂРѕРЅСѓРјРµСЂРѕРІР°С‚СЊ РІСЃРµ СѓР·Р»С‹
 		int z = 0, lvl = 0;
 		child.recountLayers(lvl);
 		child.countNodes(z);
@@ -226,14 +226,14 @@ public:
 		}
 
 
-		//Если вероятность прокнула, то идем о i-го узла
+		//Р•СЃР»Рё РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ РїСЂРѕРєРЅСѓР»Р°, С‚Рѕ РёРґРµРј Рѕ i-РіРѕ СѓР·Р»Р°
 		Tree* node1 = &first;
 		Tree* node2 = &second;
 		bool t = false;
 		while (t == false) {
 			/*
-				Отсчет узлов начинается слева, тем самым мы проверяем если выбранный узел больше
-			первого узла слева, то значит выбранный узел точно правее и наоборот
+				РћС‚СЃС‡РµС‚ СѓР·Р»РѕРІ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃР»РµРІР°, С‚РµРј СЃР°РјС‹Рј РјС‹ РїСЂРѕРІРµСЂСЏРµРј РµСЃР»Рё РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» Р±РѕР»СЊС€Рµ
+			РїРµСЂРІРѕРіРѕ СѓР·Р»Р° СЃР»РµРІР°, С‚Рѕ Р·РЅР°С‡РёС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» С‚РѕС‡РЅРѕ РїСЂР°РІРµРµ Рё РЅР°РѕР±РѕСЂРѕС‚
 
 			*/
 			if (node1->getNumNodes() == chosenNode) {
@@ -254,7 +254,7 @@ public:
 		}
 		
 		child.replaceNode(chosenNode, *node2);
-		//Используется чтобы пронумеровать все узлы
+		//РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ С‡С‚РѕР±С‹ РїСЂРѕРЅСѓРјРµСЂРѕРІР°С‚СЊ РІСЃРµ СѓР·Р»С‹
 		int z = 0, lvl = 0;
 		child.recountLayers(lvl);
 		child.countNodes(z);
@@ -280,6 +280,7 @@ class UniformCrossover : public CrossoverGP {
 		probability = 1.0 / ammNodes;
 
 		mt19937 gen(rand());
+		gen.seed(rand());
 
 		double mut = gen() % 1000000 / 1000000.0;
 
@@ -302,22 +303,22 @@ public:
 		int r = child.getNumNodes();
 		bool swapCheck;
 		for (int i = 0; i < r; i++) {
-			//Проверяем каждый узел на шанс свапа
+			//РџСЂРѕРІРµСЂСЏРµРј РєР°Р¶РґС‹Р№ СѓР·РµР» РЅР° С€Р°РЅСЃ СЃРІР°РїР°
 
-			if (!arrayReach[i]) {//Если не достижимо
+			if (!arrayReach[i]) {//Р•СЃР»Рё РЅРµ РґРѕСЃС‚РёР¶РёРјРѕ
 				continue;
 			}
 			Tree* node1 = &first;
 			Tree* node2 = &second;
 			
 
-			swapCheck = checkChance(2);//Ибо 2 родителя
+			swapCheck = checkChance(2);//РР±Рѕ 2 СЂРѕРґРёС‚РµР»СЏ
 			if (swapCheck) {
 				bool t = false;
 				while (t == false) {
 					/*
-						Отсчет узлов начинается слева, тем самым мы проверяем если выбранный узел больше
-					первого узла слева, то значит выбранный узел точно правее и наоборот
+						РћС‚СЃС‡РµС‚ СѓР·Р»РѕРІ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃР»РµРІР°, С‚РµРј СЃР°РјС‹Рј РјС‹ РїСЂРѕРІРµСЂСЏРµРј РµСЃР»Рё РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» Р±РѕР»СЊС€Рµ
+					РїРµСЂРІРѕРіРѕ СѓР·Р»Р° СЃР»РµРІР°, С‚Рѕ Р·РЅР°С‡РёС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» С‚РѕС‡РЅРѕ РїСЂР°РІРµРµ Рё РЅР°РѕР±РѕСЂРѕС‚
 
 					*/
 					if (node1->getNumNodes() == i) {

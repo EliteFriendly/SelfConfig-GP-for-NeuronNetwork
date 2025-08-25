@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
+#include "..\\neuron_network\\Tree.h"
 #include <vector>
-#include"Tree.h"
 #include <random>
 
 using namespace std;
@@ -34,7 +34,7 @@ public:
 		if (chosenNode <= ind.getLeft()->getNumNodes()) {
 			chosenInputBranch = true;
 		}
-		Tree newNode(treeDeapth,ind.getAmmInputs(), chosenInputBranch);//Уже отнималась единица до этого
+		Tree newNode(treeDeapth,ind.getAmmInputs(), chosenInputBranch);//РЈР¶Рµ РѕС‚РЅРёРјР°Р»Р°СЃСЊ РµРґРёРЅРёС†Р° РґРѕ СЌС‚РѕРіРѕ
 		ind.replaceNode(chosenNode, newNode);
 		int nodes = 0, lvl = 0;
 		ind.recountLayers(lvl);
@@ -80,6 +80,7 @@ class PointMutation : public MutationGP {
 		}
 
 		mt19937 gen(rand());
+		gen.seed(rand());
 
 		double mut = gen() % 1000000 / 1000000.0;
 
@@ -96,21 +97,21 @@ public:
 	PointMutation(string powerMut) :powerMut(powerMut) {}
 
 	void doMutChild(Tree& ind) {
-		int r = ind.getNumNodes()+1;
-		bool mutCheck;//То что будет проверять мутируется ли узел
+		int r = ind.getNumNodes();
+		bool mutCheck;//РўРѕ С‡С‚Рѕ Р±СѓРґРµС‚ РїСЂРѕРІРµСЂСЏС‚СЊ РјСѓС‚РёСЂСѓРµС‚СЃСЏ Р»Рё СѓР·РµР»
 		for (int i = 0; i < r; i++) {
 
-			//Проверяем каждый узел на шанс мутации
+			//РџСЂРѕРІРµСЂСЏРµРј РєР°Р¶РґС‹Р№ СѓР·РµР» РЅР° С€Р°РЅСЃ РјСѓС‚Р°С†РёРё
 
 			mutCheck = checkChance(r);
 			if (mutCheck) {
-				//Если вероятность прокнула, то идем о i-го узла
+				//Р•СЃР»Рё РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ РїСЂРѕРєРЅСѓР»Р°, С‚Рѕ РёРґРµРј Рѕ i-РіРѕ СѓР·Р»Р°
 				Tree* node = &ind;
 				bool t = false;
 				while (t == false) {
 					/*
-						Отсчет узлов начинается слева, тем самым мы проверяем если выбранный узел больше
-					первого узла слева, то значит выбранный узел точно правее и наоборот
+						РћС‚СЃС‡РµС‚ СѓР·Р»РѕРІ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃР»РµРІР°, С‚РµРј СЃР°РјС‹Рј РјС‹ РїСЂРѕРІРµСЂСЏРµРј РµСЃР»Рё РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» Р±РѕР»СЊС€Рµ
+					РїРµСЂРІРѕРіРѕ СѓР·Р»Р° СЃР»РµРІР°, С‚Рѕ Р·РЅР°С‡РёС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ СѓР·РµР» С‚РѕС‡РЅРѕ РїСЂР°РІРµРµ Рё РЅР°РѕР±РѕСЂРѕС‚
 
 					*/
 					if (node->getNumNodes() == i) {

@@ -4,7 +4,7 @@
 #include<functional>
 #include "MutationGP.h"
 #include"CrossoverGP.h"
-#include"Tree.h"
+#include "..\\neuron_network\\Tree.h"
 #include <random>
 
 class SelectionGP
@@ -34,7 +34,7 @@ protected:
 
 	}
 	virtual void setFitnessArray(double* inputArray, int size) {
-		arrayFitness = inputArray;//Нам не нужно выделять память, потому что мы не будем его изменять
+		arrayFitness = inputArray;//РќР°Рј РЅРµ РЅСѓР¶РЅРѕ РІС‹РґРµР»СЏС‚СЊ РїР°РјСЏС‚СЊ, РїРѕС‚РѕРјСѓ С‡С‚Рѕ РјС‹ РЅРµ Р±СѓРґРµРј РµРіРѕ РёР·РјРµРЅСЏС‚СЊ
 		sizeArray = size;
 	}
 
@@ -49,7 +49,7 @@ public:
 		sizeArray = size;
 
 		
-		// Будет использоваться в само адаптивном алгоритме
+		// Р‘СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РІ СЃР°РјРѕ Р°РґР°РїС‚РёРІРЅРѕРј Р°Р»РіРѕСЂРёС‚РјРµ
 		int listLength = size;
 
 		while (listLength--)
@@ -83,7 +83,7 @@ public:
 		
 		setFitnessArray(arrayFitness, sizeArray);
 
-	}//Нужен пока нет самоадаптивного класса
+	}//РќСѓР¶РµРЅ РїРѕРєР° РЅРµС‚ СЃР°РјРѕР°РґР°РїС‚РёРІРЅРѕРіРѕ РєР»Р°СЃСЃР°
 
 	virtual int getNumParents() = 0;
 
@@ -115,14 +115,14 @@ protected:
 		int wh = 0;
 		for (int i = 0; i < sizeArray - 1; i++) {
 			if (arrayFitness[i] == arrayFitness[i + 1]) {
-				//Если встретились одинаковые пригодности перебираем все одинаковые
+				//Р•СЃР»Рё РІСЃС‚СЂРµС‚РёР»РёСЃСЊ РѕРґРёРЅР°РєРѕРІС‹Рµ РїСЂРёРіРѕРґРЅРѕСЃС‚Рё РїРµСЂРµР±РёСЂР°РµРј РІСЃРµ РѕРґРёРЅР°РєРѕРІС‹Рµ
 				while (arrayFitness[i + wh] == arrayFitness[i + wh + 1]) {
 					wh++;
 					if ((i + wh + 1) >= sizeArray) {
 						break;
 					}
 				}
-				//Теперь делим эти найденные пригодности, для того, чтобы уравновесить вероятности
+				//РўРµРїРµСЂСЊ РґРµР»РёРј СЌС‚Рё РЅР°Р№РґРµРЅРЅС‹Рµ РїСЂРёРіРѕРґРЅРѕСЃС‚Рё, РґР»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ СѓСЂР°РІРЅРѕРІРµСЃРёС‚СЊ РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё
 				for (int j = 0; j <= wh; j++) {
 					rankArray[i + j] = double(rank) / (wh + 1);
 				}
@@ -184,7 +184,7 @@ protected:
 
 		normalArray = new double[sizeArray];
 		double min = 0;
-		//Выравнивание до положительных значений
+		//Р’С‹СЂР°РІРЅРёРІР°РЅРёРµ РґРѕ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹С… Р·РЅР°С‡РµРЅРёР№
 		for (int i = 0; i < sizeArray; i++) {
 			normalArray[i] = arrayFitness[i];
 			if (min > normalArray[i]) {
@@ -198,7 +198,7 @@ protected:
 		}
 
 		double sum = 0;
-		//Нормализация
+		//РќРѕСЂРјР°Р»РёР·Р°С†РёСЏ
 		for (int i = 0; i < sizeArray; i++) {
 			sum += normalArray[i];
 		}

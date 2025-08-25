@@ -3,7 +3,7 @@
 void DiffMutation::outLimits(IndividualDiffEvolution donor)
 {
     double* coordinats = donor.getCoordinats();
-
+    
     for (int i = 0; i < ammDimens*2; i+=2) {
         if (!(limitsDimension[i] <= donor.getCoordinats()[i / 2]) ) {
             coordinats[i / 2] = (limitsDimension[i] + coordinats[i / 2]) / 2;
