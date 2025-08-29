@@ -24,7 +24,7 @@ void Tree::recountLayers(int level)
 /// @brief
 /// @param x
 /// @param size
-void Tree::calcFitness(double **x, int size, bool t) // typeTask = "reg" or "class"
+void Tree::calcFitness(double **x, int size) // typeTask = "reg" or "class"
 {
     // calculated a RMSE
     if (typeTask == "reg")
@@ -51,10 +51,7 @@ void Tree::calcFitness(double **x, int size, bool t) // typeTask = "reg" or "cla
         {
             double *res = getValue(x[i]); // Получаем значение нейронной сети для каждого входа
             int maxIndex = 0;
-            if (t)
-            {
-                //   << res[0] << "\t" << res[1] << "\t" << res[2] << endl;
-            }
+
 
             for (int j = 1; j < ammOutputs; j++)
             { // Ищем индекс максимального значения
@@ -554,7 +551,7 @@ void Tree::changeNode(int search,
         right->changeNode(search, newNode);
 }
 
-void Tree::trainWithDE(double **x, int size)
+void Tree::trainWithDE(double **x, int size, ComputingLimitation &cLimitation)
 {
 
     // get amCoefficents from network
@@ -575,9 +572,14 @@ void Tree::trainWithDE(double **x, int size)
         exit(0);
     }
     function<double(double *)> func = [&](double *input) {
+        if (cLimitation.useComputing()){
         changeCoef(input);
-        calcFitness(x, size, false);
-        return fitness;
+        calcFitness(x, size);
+        return fitness;}
+        else{
+            changeCoef(input);
+            return 0.0;
+        }
     };
 
     double *limits = new double[amCoefficients * 2];
@@ -589,7 +591,7 @@ void Tree::trainWithDE(double **x, int size)
             limits[i] = -30;
 
     DiffEvolution DE(func, limits, amCoefficients, "targetToBest1", "max");
-    DE.startSearch(0.01, 0.5, 0.5, 50, 50);
+    DE.startSearch(0.01, 0.5, 0.5, 50, 50, cLimitation);
     int i = 0;
     double *coef = DE.getBestCoordinates();
     changeCoef(coef);

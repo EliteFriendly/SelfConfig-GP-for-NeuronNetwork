@@ -49,7 +49,7 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double **x, int ammThread)
         for (int i = 0; i < numIndividuals; i++)
         {
             arrayChildren[i].doNeuronNetwork();
-            arrayChildren[i].trainWithDE(x, size);
+            arrayChildren[i].trainWithDE(x, size, computingLimitation);
         }
         return;
     }
@@ -66,7 +66,7 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double **x, int ammThread)
 
             std::cout << "Worker #" << threadId << ": Processing individual #" << idx << std::endl;
             arrayChildren[idx].doNeuronNetwork();
-            arrayChildren[idx].trainWithDE(x, size);
+            arrayChildren[idx].trainWithDE(x, size, computingLimitation);
         }
     };
 
@@ -194,6 +194,14 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
     chosenMut = new int[numIndividuals];
     chosenSel = new int[numIndividuals];
 
+    // Set limitations
+    if (computingLimitation.getComputingLimitation() == 0)
+    {
+        int DEind = 50;
+        int DEgen = 50;
+        computingLimitation.setComputingLimitation(DEind * DEgen * numIndividuals * numGeneration);
+    }
+
     // Первая иницилизация поколения
     for (int i = 0; i < numIndividuals; i++)
     {
@@ -205,7 +213,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
 
         arrayIndividuals[i] = t;
         arrayIndividuals[i].doNeuronNetwork();
-        arrayIndividuals[i].trainWithDE(x, size);
+        arrayIndividuals[i].trainWithDE(x, size, computingLimitation);
         cout << "Individual\t" << i << endl;
     }
 

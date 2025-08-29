@@ -1,71 +1,90 @@
 #pragma once
-#include "IndividualDiffEvolution.h"
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <thread>
+#include "../neuron_network/computing-limitation.h"
 #include "DiffMutation.h"
+#include "IndividualDiffEvolution.h"
+#include <algorithm>
 #include <ctime>
 #include <functional>
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <cmath>
 
 using namespace std;
 
 class DiffEvolution
 {
-private:
-	function<double(double*)> func;
-	double* limitsDimension = nullptr;//Ограничения каждой оси
-	double F;//Масштабирующий фактор
-	double Cr;//Вероятность скрещивания
-	int N;//Количество индивидов
-	int generations;//Количество поколений
-	IndividualDiffEvolution* arrIndividuals;//Вектор содержащий целевые вектора
-	IndividualDiffEvolution best;//Лучшее найденное решение
-	DiffMutation mutation;
-	string aim;//Цель задачи
-	int ammDimens;//Количество измерений(осей)
+  private:
+    function<double(double *)> func;
+    string aim;      // Цель задачи
+    double F;        // Масштабирующий фактор
+    double Cr;       // Вероятность скрещивания
+    int N;           // Количество индивидов
+    int generations; // Количество поколений
 
-	IndividualDiffEvolution crossover(IndividualDiffEvolution);
-	void surviveCrossover(IndividualDiffEvolution);
-	void saveBest();
-public:
-	DiffEvolution(function<double(double*)> func, double* limitsDimension, int ammDimens, string typeMut, string aim) :
-		ammDimens(ammDimens),
-		func(func),
-		aim(aim)
-	{
-		DiffEvolution::limitsDimension = new double[ammDimens * 2];
+    IndividualDiffEvolution *arrIndividuals; // Вектор содержащий целевые вектора
+    IndividualDiffEvolution best;            // Лучшее найденное решение
+    double *trackBest;                       // Отслеживание лучшего решения
+	double rejectionRate = 0.1;
 
-		for (int i = 0; i < ammDimens * 2; i++) {
-			DiffEvolution::limitsDimension[i] = limitsDimension[i];
-		}
+    int ammDimens;                     // Количество измерений(осей)
+    double *limitsDimension = nullptr; // Ограничения каждой оси
 
-		mutation.setType(typeMut);
-		mutation.setLimits(limitsDimension, ammDimens);
-	}
-	void startSearch(double acc,double F, double Cr, int N,int generation);
+    DiffMutation mutation;
 
+    IndividualDiffEvolution crossover(IndividualDiffEvolution);
 
-	double* getBestCoordinates() {
-		return best.getCoordinats();
-	}
+    void surviveCrossover(IndividualDiffEvolution);
 
-	double getBestFuncValue() {
-		return func(best.getCoordinats());
-	}
-	double getBestFitness(){
-        return best.getFitness();
+    void saveBest();
+
+    bool networkQualityCheck(int generation);//This function reject the bad neural network to save recources
+
+  public:
+    DiffEvolution(function<double(double *)> func, double *limitsDimension, int ammDimens, string typeMut, string aim)
+        : ammDimens(ammDimens), func(func), aim(aim)
+    {
+        DiffEvolution::limitsDimension = new double[ammDimens * 2];
+		
+
+        for (int i = 0; i < ammDimens * 2; i++)
+        {
+            DiffEvolution::limitsDimension[i] = limitsDimension[i];
+        }
+
+        mutation.setType(typeMut);
+        mutation.setLimits(limitsDimension, ammDimens);
+    }
+    void startSearch(double acc, double F, double Cr, int N, int generation, ComputingLimitation &cl);
+
+    double *getBestCoordinates()
+    {
+        return best.getCoordinats();
     }
 
-	~DiffEvolution() {
-		if (limitsDimension != nullptr) {
-			delete[] limitsDimension;
-			limitsDimension = nullptr;
-		}
-		if (arrIndividuals != nullptr) {
-			delete[] arrIndividuals;
-			arrIndividuals = nullptr;
-		}
+    double getBestFuncValue()
+    {
+        return func(best.getCoordinats());
+    }
+    double getBestFitness()
+    {
+        return best.getFitness();
+    }
+	void setRejectionRate(double rejectionRate){
+		this->rejectionRate = rejectionRate;
 	}
-};
 
+    ~DiffEvolution()
+    {
+        if (limitsDimension != nullptr)
+        {
+            delete[] limitsDimension;
+            limitsDimension = nullptr;
+        }
+        if (arrIndividuals != nullptr)
+        {
+            delete[] arrIndividuals;
+            arrIndividuals = nullptr;
+        }
+    }
+};
