@@ -50,7 +50,17 @@ void DiffEvolution::saveBest()
     }
 }
 
-void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int generations)
+bool DiffEvolution::networkQualityCheck(int generation)
+{
+    for (int i = generation; i > generation - round(generations * rejectionRate); i--)
+    {
+        if (trackBest[i] > trackBest[i - 1])
+            return true;
+    }
+    return false;
+}
+
+void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int generations, ComputingLimitation &cl)
 {
     DiffEvolution::F = F;
     DiffEvolution::Cr = Cr;
@@ -59,6 +69,8 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
     mutation.setF(F); // Установака для корректной работы мутации
 
     arrIndividuals = new IndividualDiffEvolution[N];
+
+    trackBest = new double[generations];
 
     // Генерация первой популяции
     for (int i = 0; i < N; i++)
@@ -69,20 +81,30 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
     }
 
     saveBest();
+    if (cl.getComputingLimitation() == 0)
+    {
+        return;
+    }
 
     // Начало работы основной части программы
     IndividualDiffEvolution newInd;
-    for (int i = 0; i < generations; i++)
+    for (int i = 1; i < generations; i++)
     {
         for (int j = 0; j < N; j++)
         {
-            //  << "Номер генерации = " << i << ", Номер индивида = " << j << endl;
+
             newInd = mutation.getDonor(arrIndividuals, best, N);
             newInd = crossover(newInd);
             newInd.calcFitness();
-            
+
             surviveCrossover(newInd);
         }
         saveBest();
+        trackBest[i] = best.getFitness();
+        if (cl.getComputingLimitation() == 0 or
+            !networkQualityCheck(i)) // If amount of computing is over or best dont change then stop
+        {
+            return;
+        }
     }
 }

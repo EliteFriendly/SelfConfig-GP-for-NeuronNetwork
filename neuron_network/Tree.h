@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "../Diff_evolution/IndividualDiffEvolution.h"
+#include "computing_limitation.h"
 
 /*
 Заходя суда помни!
@@ -243,7 +244,7 @@ class Tree
 
     Tree(int d, int numInputs, int numOutputs, string typeTask);
 
-    void calcFitness(double **x, int size, bool);
+    void calcFitness(double **x, int size);
 
     string getMatrix();
 
@@ -348,7 +349,7 @@ class Tree
     void replaceNode(int, Tree &);
     void changeNode(int, Tree &);
 
-    void trainWithDE(double **x, int size);
+    void trainWithDE(double **x, int size, ComputingLimitation &cLimitation);
 
     void randFunc()
     { // Используется для оператора мутации

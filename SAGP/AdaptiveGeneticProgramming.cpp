@@ -49,7 +49,7 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double **x, int ammThread)
         for (int i = 0; i < numIndividuals; i++)
         {
             arrayChildren[i].doNeuronNetwork();
-            arrayChildren[i].trainWithDE(x, size);
+            arrayChildren[i].trainWithDE(x, size, computingLimitation);
         }
         return;
     }
@@ -64,9 +64,9 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double **x, int ammThread)
             if (idx >= numIndividuals)
                 break;
 
-            std::cout << "Worker #" << threadId << ": Processing individual #" << idx << std::endl;
+            // std::cout << "Worker #" << threadId << ": Processing individual #" << idx << std::endl;
             arrayChildren[idx].doNeuronNetwork();
-            arrayChildren[idx].trainWithDE(x, size);
+            arrayChildren[idx].trainWithDE(x, size, computingLimitation);
         }
     };
 
@@ -194,6 +194,14 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
     chosenMut = new int[numIndividuals];
     chosenSel = new int[numIndividuals];
 
+    // Set limitations
+    if (computingLimitation.getComputingLimitation() == 0)
+    {
+        int DEind = 50;
+        int DEgen = 50;
+        computingLimitation.setComputingLimitation(DEind * DEgen * numIndividuals * numGeneration);
+    }
+    cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
     // Первая иницилизация поколения
     for (int i = 0; i < numIndividuals; i++)
     {
@@ -205,15 +213,15 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
 
         arrayIndividuals[i] = t;
         arrayIndividuals[i].doNeuronNetwork();
-        arrayIndividuals[i].trainWithDE(x, size);
+        arrayIndividuals[i].trainWithDE(x, size, computingLimitation);
         cout << "Individual\t" << i << endl;
     }
-
+    cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
     findBest(x); // Первый поиск лучшего индивида
     // Основное начало алгоритма
     int numParent1, numParent2;
 
-    for (int i = 0; i < numGeneration; i++)
+    for (int i = 0; computingLimitation.getComputingLimitation() > 0; i++)
     {
         // cout << "Номер генерации = " << i << endl;
         setSelectionsArrays();
@@ -226,6 +234,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
         }
         cout << "Generation " << i << endl;
         threadsFitnessCalc(x, 12);
+        //cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
         recalcProbabilities();
 
         forming.replaceGeneration(arrayIndividuals, arrayChildren, numIndividuals);
