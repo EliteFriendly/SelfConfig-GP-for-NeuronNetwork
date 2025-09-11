@@ -1,14 +1,14 @@
 #pragma once
-#include "../neuron_network/computing-limitation.h"
+#include "../neuron_network/computing_limitation.h"
 #include "DiffMutation.h"
 #include "IndividualDiffEvolution.h"
 #include <algorithm>
+#include <cmath>
 #include <ctime>
 #include <functional>
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <cmath>
 
 using namespace std;
 
@@ -25,7 +25,7 @@ class DiffEvolution
     IndividualDiffEvolution *arrIndividuals; // Вектор содержащий целевые вектора
     IndividualDiffEvolution best;            // Лучшее найденное решение
     double *trackBest;                       // Отслеживание лучшего решения
-	double rejectionRate = 0.1;
+    double rejectionRate = 0.2;
 
     int ammDimens;                     // Количество измерений(осей)
     double *limitsDimension = nullptr; // Ограничения каждой оси
@@ -38,14 +38,13 @@ class DiffEvolution
 
     void saveBest();
 
-    bool networkQualityCheck(int generation);//This function reject the bad neural network to save recources
+    bool networkQualityCheck(int generation); // This function reject the bad neural network to save recources
 
   public:
     DiffEvolution(function<double(double *)> func, double *limitsDimension, int ammDimens, string typeMut, string aim)
         : ammDimens(ammDimens), func(func), aim(aim)
     {
         DiffEvolution::limitsDimension = new double[ammDimens * 2];
-		
 
         for (int i = 0; i < ammDimens * 2; i++)
         {
@@ -70,9 +69,10 @@ class DiffEvolution
     {
         return best.getFitness();
     }
-	void setRejectionRate(double rejectionRate){
-		this->rejectionRate = rejectionRate;
-	}
+    void setRejectionRate(double rejectionRate)
+    {
+        this->rejectionRate = rejectionRate;
+    }
 
     ~DiffEvolution()
     {

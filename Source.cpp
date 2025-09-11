@@ -120,10 +120,9 @@ int main()
     try
     {
         AdaptiveGeneticProgramming proba(treeDepth,"class");
-        proba.startTrain(data, dimension, amOutputs, str, 50, 20);
+        proba.startTrain(data, dimension, amOutputs, str, 20, 20);
         Tree best = proba.getBest();
         cout << "Best fitness: " << best.getFitness() << endl;
-        cout << "Error: " << proba.classificationError(data, str) << endl;
         proba.saveBestIndividualtoFile();
     }
     catch (const std::exception &e)

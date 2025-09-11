@@ -88,7 +88,7 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
 
     // Начало работы основной части программы
     IndividualDiffEvolution newInd;
-    for (int i = 0; i < generations; i++)
+    for (int i = 1; i < generations; i++)
     {
         for (int j = 0; j < N; j++)
         {
@@ -104,7 +104,7 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
         if (cl.getComputingLimitation() == 0 or
             !networkQualityCheck(i)) // If amount of computing is over or best dont change then stop
         {
-            break;
+            return;
         }
     }
 }

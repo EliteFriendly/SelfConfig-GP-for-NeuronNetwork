@@ -1,6 +1,6 @@
 #pragma once
-#include "../neuron_network/computing-limitation.h"
-#include "..\\neuron_network\\Tree.h"
+#include "../neuron_network/Tree.h"
+#include "../neuron_network/computing_limitation.h"
 #include "CrossoverGP.h"
 #include "FormingGP.h"
 #include "MutationGP.h"
@@ -25,14 +25,13 @@ class AdaptiveGeneticProgramming
     Tree *arrayIndividuals = nullptr;
     Tree *arrayChildren = nullptr;
 
-
     double socialCard = 0.1; // Минимальная вероятность выбора
 
-    ComputingLimitation computingLimitation;// Limits on amount calculations fitness function
-    int ammInputs;      // Количество осей или входов
-    int ammOutputs;     // Количество выходов или выходных нейронов
-    int size;           // Количество точек
-    int numberFile = 1; // Используется для именовании файла
+    ComputingLimitation computingLimitation; // Limits on amount calculations fitness function
+    int ammInputs;                           // Количество осей или входов
+    int ammOutputs;                          // Количество выходов или выходных нейронов
+    int size;                                // Количество точек
+    int numberFile = 1;                      // Используется для именовании файла
 
     int ammSel = 5;
     SelectionGP **selection = nullptr;
@@ -198,9 +197,9 @@ class AdaptiveGeneticProgramming
         }
     }
 
-
-    void setComputingLimitation(int limit){
-      computingLimitation.setComputingLimitation(limit);
+    void setComputingLimitation(int limit)
+    {
+        computingLimitation.setComputingLimitation(limit);
     }
     void numFile(int num)
     {

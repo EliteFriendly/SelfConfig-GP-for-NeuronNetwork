@@ -52,7 +52,6 @@ void Tree::calcFitness(double **x, int size) // typeTask = "reg" or "class"
             double *res = getValue(x[i]); // Получаем значение нейронной сети для каждого входа
             int maxIndex = 0;
 
-
             for (int j = 1; j < ammOutputs; j++)
             { // Ищем индекс максимального значения
                 if (res[j] > res[maxIndex])
@@ -553,7 +552,6 @@ void Tree::changeNode(int search,
 
 void Tree::trainWithDE(double **x, int size, ComputingLimitation &cLimitation)
 {
-
     // get amCoefficents from network
     int amCoefficients = 0;
     for (int i = 1; i < ammLayers; i++)
@@ -572,11 +570,14 @@ void Tree::trainWithDE(double **x, int size, ComputingLimitation &cLimitation)
         exit(0);
     }
     function<double(double *)> func = [&](double *input) {
-        if (cLimitation.useComputing()){
-        changeCoef(input);
-        calcFitness(x, size);
-        return fitness;}
-        else{
+        if (cLimitation.useComputing())
+        {
+            changeCoef(input);
+            calcFitness(x, size);
+            return fitness;
+        }
+        else
+        {
             changeCoef(input);
             return 0.0;
         }

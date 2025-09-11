@@ -2,9 +2,10 @@
 
 using namespace std;
 
+#pragma once
 class ComputingLimitation
 {
-
+  private:
     int initialComputingLimitation = 0;
 
   public:
@@ -28,4 +29,4 @@ class ComputingLimitation
             return false;
         }
     }
-}
+};
