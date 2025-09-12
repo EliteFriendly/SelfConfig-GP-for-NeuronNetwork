@@ -234,7 +234,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
         }
         cout << "Generation " << i << endl;
         threadsFitnessCalc(x, 12);
-        //cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
+        // cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
         recalcProbabilities();
 
         forming.replaceGeneration(arrayIndividuals, arrayChildren, numIndividuals);

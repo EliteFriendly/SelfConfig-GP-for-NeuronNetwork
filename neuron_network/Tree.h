@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "../Diff_evolution/IndividualDiffEvolution.h"
-#include "computing_limitation.h"
+#include "../general/computing_limitation.h"
 
 /*
 Заходя суда помни!

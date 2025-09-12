@@ -1,5 +1,5 @@
 #pragma once
-#include "../neuron_network/computing_limitation.h"
+#include "../general/computing_limitation.h"
 #include "DiffMutation.h"
 #include "IndividualDiffEvolution.h"
 #include <algorithm>

@@ -1,6 +1,7 @@
 #pragma once
+#include "../general/computing_limitation.h"
+#include "../general/sample_storage.h"
 #include "../neuron_network/Tree.h"
-#include "../neuron_network/computing_limitation.h"
 #include "CrossoverGP.h"
 #include "FormingGP.h"
 #include "MutationGP.h"
