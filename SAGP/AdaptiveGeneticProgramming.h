@@ -29,6 +29,7 @@ class AdaptiveGeneticProgramming
     double socialCard = 0.1; // Минимальная вероятность выбора
 
     ComputingLimitation computingLimitation; // Limits on amount calculations fitness function
+    double dataTrainPart = 0.75;             // Part of data for training
     int ammInputs;                           // Количество осей или входов
     int ammOutputs;                          // Количество выходов или выходных нейронов
     int size;                                // Количество точек
@@ -71,7 +72,7 @@ class AdaptiveGeneticProgramming
 
     FormingGP forming;
 
-    void findBest(double **x);
+    void findBest();
 
     int probabilityChoice(double *arrProb, int size)
     {
@@ -93,7 +94,7 @@ class AdaptiveGeneticProgramming
 
     Tree createChild(int);
 
-    void threadsFitnessCalc(double **x, int ammThread);
+    void threadsFitnessCalc(SampleStorage &data, int ammThread);
 
     int findWinner(int *arr, int ammPlayer, double *arrFitness);
 
@@ -151,6 +152,7 @@ class AdaptiveGeneticProgramming
         }
         crossProbabilities[0] = 0.1; // Ибо там пустой кроссовер
     }
+
     void startTrain(double **x, int ammInputs, int amOutPuts, int size, int numIndividuals, int numGeneration);
     Tree getBest()
     {
@@ -198,6 +200,10 @@ class AdaptiveGeneticProgramming
         }
     }
 
+    void setDataTrainPart(double part)
+    {
+        dataTrainPart = part;
+    }
     void setComputingLimitation(int limit)
     {
         computingLimitation.setComputingLimitation(limit);

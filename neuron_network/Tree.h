@@ -1,5 +1,8 @@
 #pragma once
 #include "../Diff_evolution/DiffEvolution.h"
+#include "../Diff_evolution/IndividualDiffEvolution.h"
+#include "../general/computing_limitation.h"
+#include "../general/sample_storage.h"
 #include "Neuron.h"
 #include <fstream>
 #include <functional>
@@ -7,8 +10,6 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include "../Diff_evolution/IndividualDiffEvolution.h"
-#include "../general/computing_limitation.h"
 
 /*
 Заходя суда помни!
@@ -61,17 +62,17 @@ using namespace std;
 class Tree
 {
   private:
-    int numberFunc = -1;      // Номер функции который используется в узле, в вершинах
+    int numberFunc = -1; // Номер функции который используется в узле, в вершинах
                          // функция активации
     int numVertices = 0; // Количество вершин где нужно настраивать коэффициенты
                          // (не используется)
-    int numNodes = -1;        // Количество узлов ниже
-    int layerLevel = -1;      // На каком уровне относительно начала находится узел
-    int size = -1;            // Количество данных
+    int numNodes = -1;   // Количество узлов ниже
+    int layerLevel = -1; // На каком уровне относительно начала находится узел
+    int size = -1;       // Количество данных
 
-    int numInput = -1; // Номер входа
-    int ammInputs = -1;       // Количество входов
-    int ammOutputs = -1;      // Количество выходов
+    int numInput = -1;   // Номер входа
+    int ammInputs = -1;  // Количество входов
+    int ammOutputs = -1; // Количество выходов
 
     double fitness = -9'999'999; // Ну тут понятно
 
@@ -264,7 +265,8 @@ class Tree
 
     string getFunc();
 
-    string getCoordStr(){
+    string getCoordStr()
+    {
         stringstream ss;
         for (int i = 0; i < ammLayers; i++)
         {
@@ -349,7 +351,7 @@ class Tree
     void replaceNode(int, Tree &);
     void changeNode(int, Tree &);
 
-    void trainWithDE(double **x, int size, ComputingLimitation &cLimitation);
+    void trainWithDE(SampleStorage &data, int size, ComputingLimitation &cLimitation);
 
     void randFunc()
     { // Используется для оператора мутации

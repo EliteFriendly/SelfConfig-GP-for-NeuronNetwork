@@ -1,6 +1,6 @@
 #include "AdaptiveGeneticProgramming.h"
 
-void AdaptiveGeneticProgramming::findBest(double **x)
+void AdaptiveGeneticProgramming::findBest()
 {
     for (int i = 0; i < numIndividuals; i++)
     {
@@ -42,14 +42,14 @@ Tree AdaptiveGeneticProgramming::createChild(int numInd)
     return child;
 }
 
-void AdaptiveGeneticProgramming::threadsFitnessCalc(double **x, int ammThread)
+void AdaptiveGeneticProgramming::threadsFitnessCalc(SampleStorage &data, int ammThread)
 {
     if (ammThread == 1)
     {
         for (int i = 0; i < numIndividuals; i++)
         {
             arrayChildren[i].doNeuronNetwork();
-            arrayChildren[i].trainWithDE(x, size, computingLimitation);
+            arrayChildren[i].trainWithDE(data, size, computingLimitation);
         }
         return;
     }
@@ -66,7 +66,7 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double **x, int ammThread)
 
             // std::cout << "Worker #" << threadId << ": Processing individual #" << idx << std::endl;
             arrayChildren[idx].doNeuronNetwork();
-            arrayChildren[idx].trainWithDE(x, size, computingLimitation);
+            arrayChildren[idx].trainWithDE(data, size, computingLimitation);
         }
     };
 
@@ -182,6 +182,10 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
 
     saveProbabilities();
 
+    SampleStorage sampleStorage(size, ammInputs, x, dataTrainPart, typeTask);
+    size = sampleStorage.getTrainSize();
+    // try a sample storage
+
     AdaptiveGeneticProgramming::size = size;
     AdaptiveGeneticProgramming::ammInputs = ammInputs;
     AdaptiveGeneticProgramming::ammOutputs = amOutPuts;
@@ -213,11 +217,11 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
 
         arrayIndividuals[i] = t;
         arrayIndividuals[i].doNeuronNetwork();
-        arrayIndividuals[i].trainWithDE(x, size, computingLimitation);
+        arrayIndividuals[i].trainWithDE(sampleStorage, size, computingLimitation);
         cout << "Individual\t" << i << endl;
     }
     cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
-    findBest(x); // Первый поиск лучшего индивида
+    findBest(); // Первый поиск лучшего индивида
     // Основное начало алгоритма
     int numParent1, numParent2;
 
@@ -233,11 +237,11 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
             // arrayChildren[j].trainWithDE(x, y, size, K1);
         }
         cout << "Generation " << i << endl;
-        threadsFitnessCalc(x, 12);
+        threadsFitnessCalc(sampleStorage, 12);
         // cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
         recalcProbabilities();
 
         forming.replaceGeneration(arrayIndividuals, arrayChildren, numIndividuals);
-        findBest(x);
+        findBest();
     }
 }

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 
 using namespace std;
@@ -9,45 +10,62 @@ class SampleStorage
     double **trainData = nullptr;
     double **testData = nullptr;
     int size = 0;
+    int trainSize = 0;
+    int testSize = 0;
     int amDimensions = 0;
     double trainPart;
 
-    void classificationSort(double **Data)
+    void classificationSort(double **data)
     {
         int numbersOfClasses = 0;
         for (int i = 0; i < size; i++)
         {
-            numbersOfClasses = max(numbersOfClasses, (int)trainData[i][amDimensions]);
+            numbersOfClasses = max(numbersOfClasses, (int)data[i][amDimensions - 1]);
         }
         double *amOfEveryClass = new double[numbersOfClasses];
+        for (int i = 0; i < numbersOfClasses; i++)
+        {
+            amOfEveryClass[i] = 0;
+        }
         for (int i = 0; i < size; i++)
         {
-            amOfEveryClass[(int)trainData[i][amDimensions]]++;
+
+            amOfEveryClass[(int)data[i][amDimensions - 1] - 1]++;
         }
 
         int *trainClass = new int[numbersOfClasses];
         int *usesClass = new int[numbersOfClasses];
+        int amClasses = 0;
         for (int i = 0; i < numbersOfClasses; i++)
         {
-            trainClass[i] = trainPart * amOfEveryClass[i];
+            trainClass[i] = (int)(trainPart * amOfEveryClass[i]);
+            amClasses += trainClass[i];
             usesClass[i] = 0;
+        }
+        if (amClasses != trainSize)
+        {
+            trainClass[rand() % numbersOfClasses] += trainSize - amClasses;
         }
         int i1 = 0, i2 = 0;
         for (int j = 0; j < size; j++)
         {
-            for (int w = 0; w < amDimensions; w++)
+            if (usesClass[(int)data[j][amDimensions - 1] - 1] < trainClass[(int)data[j][amDimensions - 1] - 1])
             {
-                if (usesClass[(int)trainData[j][amDimensions]] < trainClass[(int)trainData[j][amDimensions]])
+                for (int w = 0; w < amDimensions; w++)
                 {
-                    trainData[i1][w] = Data[j][w];
-                    usesClass[(int)trainData[j][amDimensions]]++;
-                    i1++;
+                    trainData[i1][w] = data[j][w];
                 }
-                else
+                usesClass[(int)data[j][amDimensions - 1] - 1]++;
+                i1++;
+            }
+            else
+            {
+                for (int w = 0; w < amDimensions; w++)
                 {
-                    testData[i2][w] = Data[j][w];
-                    i2++;
+
+                    testData[i2][w] = data[j][w];
                 }
+                i2++;
             }
         }
 
@@ -66,7 +84,7 @@ class SampleStorage
         return sqrt(sum);
     }
 
-    void regressionSort(double **Data)
+    void regressionSort(double **data)
     {
         double **sortedData = new double *[size];
 
@@ -75,7 +93,7 @@ class SampleStorage
             sortedData[i] = new double[amDimensions];
             for (int j = 0; j < amDimensions; j++)
             {
-                sortedData[i][j] = Data[i][j];
+                sortedData[i][j] = data[i][j];
             }
         }
         // Start sorting by closer point
@@ -99,6 +117,7 @@ class SampleStorage
         }
         double remainder = 1 - trainPart;
         double tmp = 0;
+        int i1 = 0, i2 = 0;
         for (int i = 0; i < size; i++)
         {
             tmp += remainder;
@@ -106,11 +125,13 @@ class SampleStorage
             {
                 if (tmp < 1)
                 {
-                    trainData[i][j] = sortedData[i][j];
+                    trainData[i1][j] = sortedData[i][j];
+                    i1++;
                 }
                 else
                 {
-                    testData[i][j] = sortedData[i][j];
+                    testData[i2][j] = sortedData[i][j];
+                    i2++;
                 }
             }
             if (tmp >= 1.0)
@@ -130,9 +151,25 @@ class SampleStorage
     SampleStorage(int size, int amDimensions, double **data, double trainPart, string target)
     {
         this->size = size;
-        this->amDimensions = amDimensions;
-        this->trainData = new double *[trainPart * size];
-        this->testData = new double *[(1 - trainPart) * size];
+        this->amDimensions = amDimensions + 1;
+        trainSize = trainPart * size;
+        testSize = (int)((1 - trainPart) * size);
+        if (trainSize * 10 % 10 > 0)
+        {
+            trainSize = (int)trainSize;
+            testSize += 1;
+        }
+        this->trainData = new double *[(int)round(trainPart * size)];
+        this->testData = new double *[(int)round((1 - trainPart) * size)];
+        for (int i = 0; i < (int)round(trainPart * size); i++)
+        {
+            this->trainData[i] = new double[amDimensions];
+        }
+        for (int i = 0; i < (int)round((1 - trainPart) * size); i++)
+        {
+            this->testData[i] = new double[amDimensions];
+        }
+
         this->trainPart = trainPart;
         if (target == "reg")
         {
@@ -143,6 +180,7 @@ class SampleStorage
             classificationSort(data);
         }
     }
+
     double **getTrainData()
     {
         return trainData;
@@ -150,6 +188,14 @@ class SampleStorage
     double **getTestData()
     {
         return testData;
+    }
+    int getTrainSize()
+    {
+        return trainSize;
+    }
+    int getTestSize()
+    {
+        return testSize;
     }
     ~SampleStorage()
     {
