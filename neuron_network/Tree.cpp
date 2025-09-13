@@ -550,7 +550,7 @@ void Tree::changeNode(int search,
         right->changeNode(search, newNode);
 }
 
-void Tree::trainWithDE(double **x, int size, ComputingLimitation &cLimitation)
+void Tree::trainWithDE(SampleStorage &data, int size, ComputingLimitation &cLimitation)
 {
     // get amCoefficents from network
     int amCoefficients = 0;
@@ -573,7 +573,20 @@ void Tree::trainWithDE(double **x, int size, ComputingLimitation &cLimitation)
         if (cLimitation.useComputing())
         {
             changeCoef(input);
-            calcFitness(x, size);
+            calcFitness(data.getTrainData(), size);
+            return fitness;
+        }
+        else
+        {
+            changeCoef(input);
+            return 0.0;
+        }
+    };
+    function<double(double *)> overFittingFunc = [&](double *input) {
+        if (cLimitation.useComputing())
+        {
+            changeCoef(input);
+            calcFitness(data.getTestData(), data.getTestSize());
             return fitness;
         }
         else
@@ -592,11 +605,11 @@ void Tree::trainWithDE(double **x, int size, ComputingLimitation &cLimitation)
             limits[i] = -30;
 
     DiffEvolution DE(func, limits, amCoefficients, "targetToBest1", "max");
+    DE.setOverFittingFunc(overFittingFunc);
     DE.startSearch(0.01, 0.5, 0.5, 50, 50, cLimitation);
     int i = 0;
     double *coef = DE.getBestCoordinates();
     changeCoef(coef);
     fitness = DE.getBestFitness();
-    // calcFitness(x, size, true);
     delete[] limits;
 }

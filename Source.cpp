@@ -119,7 +119,7 @@ int main()
 
     try
     {
-        AdaptiveGeneticProgramming proba(treeDepth,"class");
+        AdaptiveGeneticProgramming proba(treeDepth, "class");
         proba.startTrain(data, dimension, amOutputs, str, 20, 20);
         Tree best = proba.getBest();
         cout << "Best fitness: " << best.getFitness() << endl;
@@ -135,8 +135,6 @@ int main()
         cerr << "Unknown exception caught" << endl;
         exit(0);
     }
-
-   
 
     cout.precision(6);
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "../neuron_network/computing_limitation.h"
+#include "../general/computing_limitation.h"
 #include "DiffMutation.h"
 #include "IndividualDiffEvolution.h"
 #include <algorithm>
@@ -15,6 +15,7 @@ using namespace std;
 class DiffEvolution
 {
   private:
+    function<double(double *)> overFittingFunc;
     function<double(double *)> func;
     string aim;      // Цель задачи
     double F;        // Масштабирующий фактор
@@ -24,8 +25,12 @@ class DiffEvolution
 
     IndividualDiffEvolution *arrIndividuals; // Вектор содержащий целевые вектора
     IndividualDiffEvolution best;            // Лучшее найденное решение
+    IndividualDiffEvolution bestPation;      // Best solution before overfitting
     double *trackBest;                       // Отслеживание лучшего решения
-    double rejectionRate = 0.2;
+    double rejectionRate = 0.2;              // Part of all generation, which not improve the quality of solution
+
+    int maxPartPatience = 0.1; // Part of all generation, before overfitting
+    int currentPatience = 0;
 
     int ammDimens;                     // Количество измерений(осей)
     double *limitsDimension = nullptr; // Ограничения каждой оси
@@ -39,6 +44,7 @@ class DiffEvolution
     void saveBest();
 
     bool networkQualityCheck(int generation); // This function reject the bad neural network to save recources
+    bool overFittingCheck();                  // This function reject the bad neural network to save recources
 
   public:
     DiffEvolution(function<double(double *)> func, double *limitsDimension, int ammDimens, string typeMut, string aim)
@@ -55,7 +61,10 @@ class DiffEvolution
         mutation.setLimits(limitsDimension, ammDimens);
     }
     void startSearch(double acc, double F, double Cr, int N, int generation, ComputingLimitation &cl);
-
+    void setOverFittingFunc(function<double(double *)> func)
+    {
+        overFittingFunc = func;
+    }
     double *getBestCoordinates()
     {
         return best.getCoordinats();
@@ -85,6 +94,11 @@ class DiffEvolution
         {
             delete[] arrIndividuals;
             arrIndividuals = nullptr;
+        }
+        if (trackBest != nullptr)
+        {
+            delete[] trackBest;
+            trackBest = nullptr;
         }
     }
 };
