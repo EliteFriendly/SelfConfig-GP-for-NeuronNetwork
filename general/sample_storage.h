@@ -121,19 +121,25 @@ class SampleStorage
         for (int i = 0; i < size; i++)
         {
             tmp += remainder;
-            for (int j = 0; j < amDimensions; j++)
+            if (tmp < 1)
             {
-                if (tmp < 1)
+                for (int j = 0; j < amDimensions; j++)
                 {
                     trainData[i1][j] = sortedData[i][j];
-                    i1++;
                 }
-                else
+
+                i1++;
+            }
+            else
+            {
+                for (int j = 0; j < amDimensions; j++)
                 {
                     testData[i2][j] = sortedData[i][j];
-                    i2++;
                 }
+
+                i2++;
             }
+
             if (tmp >= 1.0)
             {
                 tmp -= 1.0;

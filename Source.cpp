@@ -90,23 +90,27 @@ int main()
     clock_t tStart = clock();
     cout << endl;
     // Download database Iris
-    ifstream file("test\\Iris.txt");
+    ifstream file("test/Friedman1_noise1.0_full.txt");
+    int size = 200;
+    int dimension = 11;
     if (!file.is_open())
     {
         cerr << "Error opening file" << endl;
         exit(1);
     }
     // Read data from file
-    double **data = new double *[150];
-    for (int i = 0; i < 150; i++)
+    double **data = new double *[size];
+    for (int i = 0; i < size; i++)
     {
-        data[i] = new double[5];
-        for (int j = 0; j < 5; j++)
+        data[i] = new double[dimension];
+        for (int j = 0; j < dimension; j++)
         {
             file >> data[i][j];
             if (file.peek() == ',')
                 file.ignore();
+           // cout << data[i][j] << " ";
         }
+        //cout << endl;
     }
 
     int treeDepth = 3; // depth of tree
@@ -115,14 +119,15 @@ int main()
     // do array from 1 to 100
 
     setlocale(LC_ALL, "Russian");
-    int str = 150; // number of train data
+
 
     try
     {
-        AdaptiveGeneticProgramming proba(treeDepth, "class");
-        proba.startTrain(data, dimension, amOutputs, str, 20, 20);
+        AdaptiveGeneticProgramming proba(treeDepth, "reg");
+        proba.startTrain(data, dimension, amOutputs, size, 20, 20);
         Tree best = proba.getBest();
         cout << "Best fitness: " << best.getFitness() << endl;
+        cout<< "Error: "<< proba.getError(data, size) << endl;
         proba.saveBestIndividualtoFile();
     }
     catch (const std::exception &e)
