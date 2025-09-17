@@ -19,3 +19,4 @@ add_executable(Source
 
 # Копируем данные в папку сборки (опционально)
 file(COPY test/ DESTINATION ${CMAKE_BINARY_DIR}/test)
+file(COPY algorithm_results/ DESTINATION ${CMAKE_BINARY_DIR}/algorithm_results)

@@ -64,7 +64,7 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(double **x, int ammThread)
             if (idx >= numIndividuals)
                 break;
 
-            std::cout << "Worker #" << threadId << ": Processing individual #" << idx << std::endl;
+            // std::cout << "Worker #" << threadId << ": Processing individual #" << idx << std::endl;
             arrayChildren[idx].doNeuronNetwork();
             arrayChildren[idx].trainWithDE(x, size);
         }
@@ -175,10 +175,10 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
                                             int numGeneration)
 {
 
-    fSel.open("Probabilities/ProbabilSel_" + to_string(numberFile) + ".txt");
+    fSel.open("algorithm_results/Probabilities/ProbabilSel_" + to_string(numberFile) + ".txt");
 
-    fCross.open("Probabilities/ProbabilCross_" + to_string(numberFile) + ".txt");
-    fMut.open("Probabilities/ProbabilMut_" + to_string(numberFile) + ".txt");
+    fCross.open("algorithm_results/Probabilities/ProbabilCross_" + to_string(numberFile) + ".txt");
+    fMut.open("algorithm_results/Probabilities/ProbabilMut_" + to_string(numberFile) + ".txt");
 
     saveProbabilities();
 

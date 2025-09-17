@@ -1,8 +1,11 @@
 #include "SAGP/AdaptiveGeneticProgramming.h"
 #include "neuron_network/Tree.h"
+#include <direct.h>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <locale.h>
+#include <sstream>
 #include <time.h>
 #include <vector>
 using namespace std;
@@ -87,57 +90,65 @@ double addNoise(double x, int power)
 
 int main()
 {
+
+    cout << "Current path: " << filesystem::current_path() << endl;
+
     clock_t tStart = clock();
     cout << endl;
     // Download database Iris
-    ifstream file("test\\Iris.txt");
-    if (!file.is_open())
+    ifstream file("test/Friedman3_noise1.0_train.txt");
+    ifstream fileTest("test/Friedman3_noise1.0_test.txt");
+    if (!file.is_open() and !fileTest.is_open())
     {
-        cerr << "Error opening file" << endl;
+        cerr << "Error opening files" << endl;
         exit(1);
     }
     // Read data from file
-    double **data = new double *[150];
-    for (int i = 0; i < 150; i++)
+    int dim = 5, size = 200 * 0.75, sizeTest = 200 * 0.25;
+    double **data = new double *[size];
+    double **dataTest = new double *[sizeTest];
+    for (int i = 0; i < size; i++)
     {
-        data[i] = new double[5];
-        for (int j = 0; j < 5; j++)
+        data[i] = new double[dim];
+        for (int j = 0; j < dim; j++)
         {
             file >> data[i][j];
-            if (file.peek() == ',')
-                file.ignore();
+        }
+    }
+    for (int i = 0; i < sizeTest; i++)
+    {
+        dataTest[i] = new double[dim];
+        for (int j = 0; j < dim; j++)
+        {
+            fileTest >> dataTest[i][j];
         }
     }
 
     int treeDepth = 3; // depth of tree
-    int amOutputs = 3; // number of outputs
+    int amOutputs = 1; // number of outputs
 
     // do array from 1 to 100
 
     setlocale(LC_ALL, "Russian");
-    int str = 150; // number of train data
 
-    try
+    for (int i = 1; i <= 10; i++)
     {
-        AdaptiveGeneticProgramming proba(treeDepth,"class");
-        proba.startTrain(data, dimension, amOutputs, str, 50, 20);
+
+        ofstream fileOut("algorithm_results/Results/Error" + to_string(i) + ".txt");
+        if (!fileOut.is_open())
+        {
+            cout << "Error opening file out" << endl;
+            exit(1);
+        }
+        cout << "Iteration " << i << endl;
+        AdaptiveGeneticProgramming proba(treeDepth, "reg");
+        proba.numFile(i);
+        proba.startTrain(data, dim - 1, amOutputs, size, 30, 30);
         Tree best = proba.getBest();
+        fileOut << proba.getError(dataTest, sizeTest) << endl;
         cout << "Best fitness: " << best.getFitness() << endl;
-        cout << "Error: " << proba.classificationError(data, str) << endl;
-        proba.saveBestIndividualtoFile();
+        fileOut.close();
     }
-    catch (const std::exception &e)
-    {
-        cout << "Exception caught: " << e.what() << endl;
-        exit(0);
-    }
-    catch (...)
-    {
-        cerr << "Unknown exception caught" << endl;
-        exit(0);
-    }
-
-   
 
     cout.precision(6);
 
