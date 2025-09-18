@@ -382,7 +382,7 @@ class Tree
         ofstream file(fileName);
         if (!file.is_open())
         {
-            cerr << "Error opening file: " << fileName << endl;
+            cerr << "Error opening file for network: " << fileName << endl;
             return;
         }
 

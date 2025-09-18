@@ -56,9 +56,11 @@ public:
 	{
 		if(limitsDimension != nullptr){
 			delete[] limitsDimension;
+			limitsDimension = nullptr;
 		}
 		if (selectedInd != nullptr) {
 			delete[] selectedInd;
+			selectedInd = nullptr;
 		}
 
 	}

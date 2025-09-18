@@ -88,69 +88,91 @@ double addNoise(double x, int power)
         return x - double(rand() % power + rand() % 1) / 100.0 * x;
 }
 
-int main()
+void test(string path, int size, int dim, int amOutputs, int number, int depth)
 {
-
-    cout << "Current path: " << filesystem::current_path() << endl;
-
-    clock_t tStart = clock();
-    cout << endl;
-    // Download database Iris
-    ifstream file("test/Friedman3_noise1.0_train.txt");
-    ifstream fileTest("test/Friedman3_noise1.0_test.txt");
-    if (!file.is_open() and !fileTest.is_open())
+    ifstream file(path);
+    int sizeTrain = size * 0.75;
+    int sizeTest = size - sizeTrain;
+    dimension = dim;
+    if (!file.is_open())
     {
         cerr << "Error opening files" << endl;
         exit(1);
     }
     // Read data from file
-    int dim = 5, size = 200 * 0.75, sizeTest = 200 * 0.25;
-    double **data = new double *[size];
+    int i1 = 0, i2 = 0;
+    double **data = new double *[sizeTrain];
     double **dataTest = new double *[sizeTest];
     for (int i = 0; i < size; i++)
     {
-        data[i] = new double[dim];
-        for (int j = 0; j < dim; j++)
+        if (i % 4 == 0)
         {
-            file >> data[i][j];
+            dataTest[i1] = new double[dimension];
+            for (int j = 0; j < dimension; j++)
+            {
+                file >> dataTest[i1][j];
+                if (file.peek() == ',')
+                    file.ignore();
+                // cout << data[i][j] << " ";
+            }
+            i1++;
         }
+        else
+        {
+            data[i2] = new double[dimension];
+
+            for (int j = 0; j < dimension; j++)
+            {
+                file >> data[i2][j];
+                if (file.peek() == ',')
+                    file.ignore();
+                // cout << data[i][j] << " ";
+            }
+            i2++;
+        }
+
+        // cout << endl;
     }
-    for (int i = 0; i < sizeTest; i++)
+
+    int treeDepth = depth; // depth of tree
+
+    ofstream fileOut("algorithm_results/Results/Error" + to_string(number) + ".txt");
+    if (!fileOut.is_open())
     {
-        dataTest[i] = new double[dim];
-        for (int j = 0; j < dim; j++)
-        {
-            fileTest >> dataTest[i][j];
-        }
+        cout << "Error opening file out" << endl;
+        exit(1);
     }
+    cout << "Iteration " << number << endl;
+    AdaptiveGeneticProgramming proba(treeDepth, "class");
+    proba.numFile(number);
+    proba.startTrain(data, dimension - 1, amOutputs, sizeTrain, 30, 30);
+    Tree best = proba.getBest();
+    // fileOut << proba.getError(dataTest, size * 0.25) << endl;
+    fileOut << proba.classificationError(data, sizeTrain) << endl;
+    fileOut << proba.classificationError(dataTest, sizeTest) << endl;
+    proba.saveBestIndividualtoFile();
+    fileOut.close();
+    file.close();
+}
 
-    int treeDepth = 3; // depth of tree
-    int amOutputs = 1; // number of outputs
+int main()
+{
 
-    // do array from 1 to 100
+    clock_t tStart = clock();
 
-    setlocale(LC_ALL, "Russian");
+    string path[3] = {"test/Iris.txt", "test/wine.txt", "test/breast_cancer.txt"};
+    int size[3] = {150, 178, 569};
+    int amOutputs[3] = {3, 3, 2};
+    int dimension[3] = {4 + 1, 13 + 1, 30 + 1};
+    int depth[3] = {3, 4, 5};
 
-    for (int i = 1; i <= 10; i++)
+    for (int i = 1; i < 3; i++)
     {
-
-        ofstream fileOut("algorithm_results/Results/Error" + to_string(i) + ".txt");
-        if (!fileOut.is_open())
+        for (int j = 0; j < 10; j++)
         {
-            cout << "Error opening file out" << endl;
-            exit(1);
+            test(path[i], size[i], dimension[i], amOutputs[i], j + 10*i, depth[i]);
         }
-        cout << "Iteration " << i << endl;
-        AdaptiveGeneticProgramming proba(treeDepth, "reg");
-        proba.numFile(i);
-        proba.startTrain(data, dim - 1, amOutputs, size, 30, 30);
-        Tree best = proba.getBest();
-        fileOut << proba.getError(dataTest, sizeTest) << endl;
-        cout << "Best fitness: " << best.getFitness() << endl;
-        fileOut.close();
     }
-
-    cout.precision(6);
 
     cout << "Good";
 

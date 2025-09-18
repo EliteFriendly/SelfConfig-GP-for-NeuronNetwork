@@ -206,7 +206,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
         arrayIndividuals[i] = t;
         arrayIndividuals[i].doNeuronNetwork();
         arrayIndividuals[i].trainWithDE(x, size);
-        cout << "Individual\t" << i << endl;
+        //cout << "Individual\t" << i << endl;
     }
 
     findBest(x); // Первый поиск лучшего индивида
@@ -231,4 +231,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
         forming.replaceGeneration(arrayIndividuals, arrayChildren, numIndividuals);
         findBest(x);
     }
+    fSel.close();
+    fMut.close();
+    fCross.close();
 }
