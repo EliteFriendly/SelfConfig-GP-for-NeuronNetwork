@@ -215,7 +215,7 @@ class AdaptiveGeneticProgramming
     void saveBestIndividualtoFile()
     {
 
-        bestIndividual.saveNetworkToFile(numberFile + "_best.txt");
+        bestIndividual.saveNetworkToFile("algorithm_results/best"+to_string(numberFile) + "_best.txt");
     }
 
     ~AdaptiveGeneticProgramming()

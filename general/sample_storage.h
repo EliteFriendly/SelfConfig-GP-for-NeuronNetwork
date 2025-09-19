@@ -44,6 +44,7 @@ class SampleStorage
         }
         if (amClasses != trainSize)
         {
+            cout << "Er" << endl;
             trainClass[rand() % numbersOfClasses] += trainSize - amClasses;
         }
         int i1 = 0, i2 = 0;
@@ -72,6 +73,7 @@ class SampleStorage
         delete[] amOfEveryClass;
         delete[] trainClass;
         delete[] usesClass;
+
     }
 
     double getDistance(double *a, double *b)
@@ -160,20 +162,19 @@ class SampleStorage
         this->amDimensions = amDimensions + 1;
         trainSize = trainPart * size;
         testSize = (int)((1 - trainPart) * size);
-        if (trainSize * 10 % 10 > 0)
+        if (int(trainPart * size * 10) % 10 > 0)
         {
-            trainSize = (int)trainSize;
             testSize += 1;
         }
-        this->trainData = new double *[(int)round(trainPart * size)];
-        this->testData = new double *[(int)round((1 - trainPart) * size)];
-        for (int i = 0; i < (int)round(trainPart * size); i++)
+        this->trainData = new double *[trainSize];
+        this->testData = new double *[testSize];
+        for (int i = 0; i < trainSize; i++)
         {
-            this->trainData[i] = new double[amDimensions];
+            this->trainData[i] = new double[this->amDimensions];
         }
-        for (int i = 0; i < (int)round((1 - trainPart) * size); i++)
+        for (int i = 0; i < testSize; i++)
         {
-            this->testData[i] = new double[amDimensions];
+            this->testData[i] = new double[this->amDimensions];
         }
 
         this->trainPart = trainPart;

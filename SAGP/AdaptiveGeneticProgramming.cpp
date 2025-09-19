@@ -174,11 +174,11 @@ void AdaptiveGeneticProgramming::recalcProbabilities()
 void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOutPuts, int size, int numIndividuals,
                                             int numGeneration)
 {
+    ofstream fGen("algorithm_results/MaxGeneration/ReachedGeneration_" + to_string(numberFile) + ".txt");
+    fSel.open("algorithm_results/Probabilities/ProbabilSel_" + to_string(numberFile) + ".txt");
 
-    fSel.open("Probabilities/ProbabilSel_" + to_string(numberFile) + ".txt");
-
-    fCross.open("Probabilities/ProbabilCross_" + to_string(numberFile) + ".txt");
-    fMut.open("Probabilities/ProbabilMut_" + to_string(numberFile) + ".txt");
+    fCross.open("algorithm_results/Probabilities/ProbabilCross_" + to_string(numberFile) + ".txt");
+    fMut.open("algorithm_results/Probabilities/ProbabilMut_" + to_string(numberFile) + ".txt");
 
     saveProbabilities();
 
@@ -197,7 +197,6 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
     chosenCross = new int[numIndividuals];
     chosenMut = new int[numIndividuals];
     chosenSel = new int[numIndividuals];
-
     // Set limitations
     if (computingLimitation.getComputingLimitation() == 0)
     {
@@ -220,18 +219,18 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
         arrayIndividuals[i].trainWithDE(sampleStorage, size, computingLimitation);
         cout << "Individual\t" << i << endl;
     }
-    cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
+    //cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
     findBest(); // Первый поиск лучшего индивида
     // Основное начало алгоритма
     int numParent1, numParent2;
-
+    int maxGeneration = 0;
     for (int i = 0; computingLimitation.getComputingLimitation() > 0; i++)
     {
         // cout << "Номер генерации = " << i << endl;
         setSelectionsArrays();
         for (int j = 0; j < numIndividuals; j++)
         {
-            // cout << "Номер генерации = " << i <<", Номер индивида = " << j << endl;
+            //cout << "Номер генерации = " << i <<", Номер индивида = " << j << endl;
 
             arrayChildren[j] = createChild(j);
             // arrayChildren[j].trainWithDE(x, y, size, K1);
@@ -243,5 +242,11 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
 
         forming.replaceGeneration(arrayIndividuals, arrayChildren, numIndividuals);
         findBest();
+        maxGeneration = i;
     }
+    fGen << maxGeneration << endl;
+    fGen.close();
+    fSel.close();
+    fCross.close();
+    fMut.close();
 }

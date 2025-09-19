@@ -46,14 +46,15 @@ void DiffEvolution::saveBest()
         if (best < arrIndividuals[i])
         {
             best = arrIndividuals[i];
-
         }
     }
 }
 
 bool DiffEvolution::networkQualityCheck(int generation)
 {
-    for (int i = generation; i > generation - round(generations * rejectionRate); i--)
+    if (generation < round(generations * rejectionRate))
+        return true;
+    for (int i = generation; i > generation - round(generations * rejectionRate) + 1; i--)
     {
         if (trackBest[i] > trackBest[i - 1])
             return true;
@@ -64,7 +65,7 @@ bool DiffEvolution::networkQualityCheck(int generation)
 bool DiffEvolution::overFittingCheck()
 {
     double validationError = overFittingFunc(best.getCoordinats());
-    if ((validationError - best.getFitness()) >= -0.08)//We want MAXIMAZE fitness
+    if ((validationError / best.getFitness()) >= 0.9) // We want MAXIMAZE fitness
     {
         bestPation = best;
         currentPatience = 0;
@@ -74,9 +75,9 @@ bool DiffEvolution::overFittingCheck()
     {
         currentPatience++;
     }
-    if (currentPatience >= maxPartPatience*generations)
+    if (currentPatience >= maxPartPatience * generations)
     {
-        //cout<<"Overfitted"<<endl;
+        // cout<<"Overfitted"<<endl;
         best = bestPation; // Return to best individual before overfitting
         return true;       // Overfitted
     }
@@ -105,7 +106,8 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
 
     saveBest();
     bestPation = best;
-    //bestPation = best;
+    trackBest[0] = best.getFitness();
+    // bestPation = best;
     if (cl.getComputingLimitation() == 0)
     {
         return;
@@ -126,9 +128,8 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
         }
         saveBest();
         trackBest[i] = best.getFitness();
-        if (cl.getComputingLimitation() == 0 or !networkQualityCheck(i)
-            or  overFittingCheck()
-            ) // If amount of computing is over or best dont change then stop
+        if (cl.getComputingLimitation() == 0 or !networkQualityCheck(i) or
+            overFittingCheck()) // If amount of computing is over or best dont change then stop
         {
             return;
         }

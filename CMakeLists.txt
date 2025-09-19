@@ -4,8 +4,8 @@ project(SelfConfig-GP-for-NeuronNetwork)
 
 set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_BUILD_TYPE Debug)  # Включает отладочную информацию
-set(CMAKE_BUILD_TYPE Debug)
-add_compile_options(-O0 -g3)  # Отключаем оптимизации
+#set(CMAKE_BUILD_TYPE Debug)
+add_compile_options(-O1 -g3)  # Отключаем оптимизации
 
 add_executable(Source
     Source.cpp
@@ -19,3 +19,4 @@ add_executable(Source
 
 # Копируем данные в папку сборки (опционально)
 file(COPY test/ DESTINATION ${CMAKE_BINARY_DIR}/test)
+file(COPY algorithm_results/ DESTINATION ${CMAKE_BINARY_DIR}/algorithm_results)
