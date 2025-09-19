@@ -4,6 +4,7 @@
 #include "../general/computing_limitation.h"
 #include "../general/sample_storage.h"
 #include "Neuron.h"
+#include "RProp.h"
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -98,10 +99,16 @@ class Tree
     string typeTask = "reg";                   // Тип задачи, регрессия или классификация
     vector<string> strBinaryFunc = {"+", ">"}; // Символьный вывод функции
 
-    int amFuncActive = 15; // Количество функций активации
-    function<double(double)> funcActivation[16] = {
-        [](double x) { return x; },      // 0
-        [](double x) { return sin(x); }, // 1
+    int amFuncActive = 17; // Количество функций активации
+    function<double(double)> funcActivation[17] = {
+        [](double x) { return x; },                            // 0
+        [](double x) { return 1 / (1 + fixExp(-x)); },         // 1
+        [](double x) { return (x * (1 / (1 + fixExp(-x)))); }, // 2
+        [](double x) { return fixExp(x); },                    // 3
+        [](double x) { return max(0.0, x); },                  // 4
+        [](double x) { return (tanh(x)); },                    // 5
+        [](double x) { return (x / (1 + abs(x))); },           // 6
+        [](double x) { return sin(x); },                       // 7
         [](double x) {
             if (x < -1)
                 return -1.0;
@@ -109,30 +116,19 @@ class Tree
                 return 1.0;
             else
                 return x;
-        },                                                // 2
-        [](double x) { return 2 / (1 + fixExp(x)) - 1; }, // 3
-        [](double x) { return fixExp(x); },               // 4
-        [](double x) { return abs(x); },                  // 5
-        [](double x) { return 1 - fixExp(x); },           // 6
-        [](double x) { return 0; },                       // 7
-        [](double x) { return fixPow(x, 2); },            // 8
-        [](double x) { return fixPow(x, 3); },            // 9
+        },                                                // 8
+        [](double x) { return 2 / (1 + fixExp(x)) - 1; }, // 9
+        [](double x) { return 1 - fixExp(x); },           // 10
+        [](double x) { return 0; },                       // 11
+        [](double x) { return fixPow(x, 2); },            // 12
+        [](double x) { return fixPow(x, 3); },            // 13
         [](double x) {
             if (x == 0)
                 return 0.0;
             return fixPow(x, -1);
-        },                                             // 10
-        [](double x) { return 1; },                    // 11
-        [](double x) { return 1 / (1 + fixExp(-x)); }, // 12
-        [](double x) { return fixExp(-(x * x) / 2); }, // 13
-        [](double x) {
-            if (x < -1 / 2)
-                return -1.0;
-            if (x > 1 / 2)
-                return 1.0;
-            else
-                return x + 1 / 2;
-        } // 14
+        },                                             // 14
+        [](double x) { return 1; },                    // 15
+        [](double x) { return fixExp(-(x * x) / 2); }, // 16
     };
 
     void doHiddenNeuron();
