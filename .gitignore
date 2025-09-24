@@ -367,3 +367,6 @@ FodyWeavers.xsd
 
 #VSCode cache
 **/.vscode
+
+#all results
+**algorithm_results/**/*.txt

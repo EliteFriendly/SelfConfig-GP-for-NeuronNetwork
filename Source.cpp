@@ -148,7 +148,7 @@ int main()
     int dimension[3] = {4 + 1, 13 + 1, 30 + 1};
     int depth[3] = {3, 3, 3};
 
-    for (int i = 1; i < 3; i++)
+    for (int i = 0; i < 1; i++)
     {
         for (int j = 0; j < 10; j++)
         {

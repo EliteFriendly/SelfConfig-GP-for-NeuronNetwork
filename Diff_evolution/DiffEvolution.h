@@ -27,7 +27,7 @@ class DiffEvolution
     IndividualDiffEvolution best;            // Лучшее найденное решение
     IndividualDiffEvolution bestPation;      // Best solution before overfitting
     double *trackBest;                       // Отслеживание лучшего решения
-    double rejectionRate = 0.2;              // Part of all generation, which not improve the quality of solution
+    double rejectionRate = 0.3;              // Part of all generation, which not improve the quality of solution
 
     int maxPartPatience = 0.1; // Part of all generation, before overfitting
     int currentPatience = 0;
