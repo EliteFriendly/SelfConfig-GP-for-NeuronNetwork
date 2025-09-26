@@ -73,7 +73,6 @@ class SampleStorage
         delete[] amOfEveryClass;
         delete[] trainClass;
         delete[] usesClass;
-
     }
 
     double getDistance(double *a, double *b)
@@ -123,7 +122,7 @@ class SampleStorage
         for (int i = 0; i < size; i++)
         {
             tmp += remainder;
-            if (tmp < 1)
+            if (tmp < 1 and i1 < trainSize)
             {
                 for (int j = 0; j < amDimensions; j++)
                 {

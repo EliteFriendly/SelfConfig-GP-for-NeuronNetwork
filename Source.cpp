@@ -125,10 +125,10 @@ void test(string path, int size, int dim, int amOutputs, int number, int depth)
         exit(1);
     }
     cout << "Iteration " << number << endl;
-    AdaptiveGeneticProgramming proba(treeDepth, "class");
+    AdaptiveGeneticProgramming proba(treeDepth, "reg");
     proba.numFile(number);
 
-    proba.startTrain(data, dimension - 1, amOutputs, size, 30, 30);
+    proba.startTrain(data, dimension - 1, 1, size, 10, 10);
     Tree best = proba.getBest();
     // fileOut << proba.getError(dataTest, size * 0.25) << endl;
     fileOut << proba.getError(storage.getTrainData(), storage.getTrainSize()) << endl;
@@ -150,7 +150,7 @@ int main()
 
     for (int i = 0; i < 1; i++)
     {
-        for (int j = 0; j < 10; j++)
+        for (int j = 0; j < 1; j++)
         {
             test(path[i], size[i], dimension[i], amOutputs[i], j + 10 * i, depth[i]);
         }
