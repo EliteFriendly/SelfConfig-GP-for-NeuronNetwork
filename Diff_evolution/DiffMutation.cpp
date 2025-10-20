@@ -27,13 +27,13 @@ IndividualDiffEvolution DiffMutation::getDonor(IndividualDiffEvolution *arrIndiv
 
     for (int i = 0; i < ammount; i++)
     {
-        number = rand() % ammInd;
+        number = gen() % ammInd;
         int j = 0;
         while ((j != ammount or j <= i) and !(ammInd < ammount))
         {
             if (selectedInd[j] == number)
             {
-                number = rand() % ammInd;
+                number = gen() % ammInd;
                 j = 0;
             }
             else

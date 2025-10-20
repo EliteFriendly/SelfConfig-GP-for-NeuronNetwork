@@ -6,6 +6,7 @@
 #include "MutationGP.h"
 #include "CrossoverGP.h"
 #include "..\\neuron_network\\Tree.h"
+#include "../general/general_var.h"
 class FormingGP
 {
 public:

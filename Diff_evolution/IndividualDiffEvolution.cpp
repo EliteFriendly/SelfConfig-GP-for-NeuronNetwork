@@ -1,5 +1,5 @@
 #include "IndividualDiffEvolution.h"
-#include <functional>
+
 
 IndividualDiffEvolution::IndividualDiffEvolution(double *limitsDimension, function<double(double *)> func, int ammDimen,
                                                  double acc, string aim)
@@ -17,7 +17,7 @@ IndividualDiffEvolution::IndividualDiffEvolution(double *limitsDimension, functi
     for (int i = 0; i < ammDimen * 2; i += 2)
     {
         n = (abs(limitsDimension[i] - limitsDimension[i + 1])) / acc;
-        coordinats[i / 2] = (rand() % n) * acc + limitsDimension[i];
+        coordinats[i / 2] = (gen() % n) * acc + limitsDimension[i];
     }
 }
 

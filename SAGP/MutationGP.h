@@ -2,7 +2,7 @@
 #include <iostream>
 #include "..\\neuron_network\\Tree.h"
 #include <vector>
-#include <random>
+#include "../general/general_var.h"
 
 using namespace std;
 
@@ -29,7 +29,7 @@ public:
 	void doMutChild(Tree& ind) {
 
 		int r = ind.getNumNodes();
-		int chosenNode = rand() % r;
+		int chosenNode = gen() % r;
 		bool chosenInputBranch = false;
 		if (chosenNode <= ind.getLeft()->getNumNodes()) {
 			chosenInputBranch = true;

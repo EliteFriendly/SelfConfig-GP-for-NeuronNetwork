@@ -10,10 +10,12 @@ add_compile_options(-O0 -g3)  # Отключаем оптимизации
 add_executable(Source
     Source.cpp
     neuron_network/Tree.cpp
+    neuron_network/Neuron.cpp
     SAGP/AdaptiveGeneticProgramming.cpp
     Diff_evolution/IndividualDiffEvolution.cpp
     Diff_evolution/DiffMutation.cpp
     Diff_evolution/DiffEvolution.cpp
+
     # Добавьте другие исходные файлы
 )
 

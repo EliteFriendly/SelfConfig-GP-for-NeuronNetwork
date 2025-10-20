@@ -5,7 +5,8 @@
 #include "MutationGP.h"
 #include"CrossoverGP.h"
 #include "..\\neuron_network\\Tree.h"
-#include <random>
+#include "../general/general_var.h"
+
 
 class SelectionGP
 {
@@ -16,9 +17,6 @@ protected:
 
 
 	int velocityChoice(double* velocityArr) {
-		//random_device rd;
-
-		mt19937 gen(rand());
 
 		double sum = velocityArr[0];
 		int number = 0;

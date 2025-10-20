@@ -1,6 +1,6 @@
 #include <cmath>
 #include <iostream>
-
+#include "../general/general_var.h"
 using namespace std;
 
 #pragma once
@@ -45,7 +45,7 @@ class SampleStorage
         if (amClasses != trainSize)
         {
             cout << "Er" << endl;
-            trainClass[rand() % numbersOfClasses] += trainSize - amClasses;
+            trainClass[gen() % numbersOfClasses] += trainSize - amClasses;
         }
         int i1 = 0, i2 = 0;
         for (int j = 0; j < size; j++)

@@ -2,6 +2,7 @@
 #include "IndividualDiffEvolution.h"
 #include<vector>
 #include <iostream>
+#include "../general/general_var.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ public:
 
 	void setType(string type) {
 		DiffMutation::type = type;
-		if (type == "rand1") {
+		if (type == "gen1") {
 			ammount = 3;
 		}
 		if (type == "rand2") {

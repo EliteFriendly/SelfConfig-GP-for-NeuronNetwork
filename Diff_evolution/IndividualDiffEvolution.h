@@ -2,6 +2,7 @@
 #include<iostream>
 #include<vector>
 #include <functional>
+#include "../general/general_var.h"
 using namespace std;
 
 class IndividualDiffEvolution
