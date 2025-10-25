@@ -52,7 +52,7 @@ class Neuron
         {
             for (int i = 0; i < amountInpRNN; i++)
             {
-                sum += weightsRNN[i] * inputs[amountInp + 1 + i];
+                sum += weightsRNN[i] * inputs[amountInp + i];
             }
         }
 
@@ -75,13 +75,17 @@ class Neuron
     {
         return haveRNN;
     }
-    int **getcoordRNN_firstL()
+    int **getcoordRNNInputs()
     {
         return inputRNN;
     }
     int getAmountInp()
     {
-        return amountInp + amountInpRNN;
+        return amountInp;
+    }
+    int getAmountInpRNN()
+    {
+        return amountInpRNN;
     }
 
     void connect(int amount, int *xOutputs, int *yOutputs, int x,
@@ -111,8 +115,9 @@ class Neuron
             {
                 ss << "| " << inputRNN[i][0] << " ; " << inputRNN[i][1] << " |";
             }
-            return ss.str();
+            
         }
+        return ss.str();
     }
     int **getCoord()
     {
@@ -134,17 +139,24 @@ class Neuron
     {
         return weights;
     }
+    double* getWeightsRNN()
+    {
+        return weightsRNN;
+    }
     void haveOutput()
     {
         output = true;
     }
     ~Neuron();
-    Neuron operator=(const Neuron &copy)
+    Neuron operator=(const Neuron& copy)
     {
+        value = copy.value;
+        amountInpRNN = copy.amountInpRNN;
         output = copy.output;
         amountInp = copy.amountInp;
         useFunc = copy.useFunc;
         inputBranch = copy.inputBranch;
+        haveRNN = copy.haveRNN;
         if (copy.input != nullptr)
         {
             if (input != nullptr)
@@ -155,12 +167,34 @@ class Neuron
                 }
                 delete[] input;
             }
-            input = new int *[amountInp];
+            input = new int* [amountInp];
             for (int i = 0; i < amountInp; i++)
             {
                 input[i] = new int[2];
                 input[i][0] = copy.input[i][0];
                 input[i][1] = copy.input[i][1];
+            }
+        }
+        if (copy.inputRNN != nullptr)
+        {
+            if (inputRNN != nullptr)
+                delete[] inputRNN;
+            inputRNN = new int* [amountInpRNN];
+            for (int i = 0; i < amountInpRNN; i++)
+            {
+                inputRNN[i] = new int[2];
+                inputRNN[i][0] = copy.inputRNN[i][0];
+                inputRNN[i][1] = copy.inputRNN[i][1];
+            }
+        }
+        if (copy.weightsRNN != nullptr)
+        {
+            if (weightsRNN != nullptr)
+                delete[] weightsRNN;
+            weightsRNN = new double[amountInpRNN];
+            for (int i = 0; i < amountInpRNN; i++)
+            {
+                weightsRNN[i] = copy.weightsRNN[i];
             }
         }
         if (copy.weights != nullptr)

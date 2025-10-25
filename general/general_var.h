@@ -1,18 +1,51 @@
+
 #include <random>
 #include <cmath>
 #include <iostream>
 #include <functional>
 using namespace std;
 
+#pragma once
 //General 
-static mt19937 gen(rand()); // random generator
+static mt19937 gen(90086); // random generator
 
 //for Tree
 static const int amBinaryFunc = 2; // Количество бинарных функций
 static const int amUnaryFunc = 1; // Количество унарных функций
-vector<string> strBinaryFunc = { "+", ">" }; // Символьный вывод функции
-vector<string> strUnaryFunc = {"↻"}; // Символьный вывод функции unary
- int amFuncActive = 15; // Количество функций активации
+static const vector<string> strBinaryFunc = { "+", ">" }; // Символьный вывод функции
+static const vector<string> strUnaryFunc = {"recc"}; // Символьный вывод функции unary
+static const int amFuncActive = 15; // Количество функций активации
+
+static double fixExp(double x)
+{ // fix exponent
+    if (x <= -10)
+        return exp(-10);
+    if (x >= 10)
+        return exp(10);
+    return exp(x);
+}
+static double fixLog(double x)
+{ // fix log
+    if (x <= 0)
+        return 0;
+    return log(x);
+}
+static double fixPow(double x, double y)
+{ // fix pow
+    double result = pow(x, y);
+    if (result == 0 && x != 0)
+        return 0;
+    if (abs(result) > 1e50)
+    {
+        if (result > 0)
+            return 1e50;
+        else
+            return -1e50;
+    }
+    return pow(x, y);
+}
+
+
 static function<double(double)> funcActivation[16] = {
         [](double x) { return x; },      // 0
         [](double x) { return sin(x); }, // 1
@@ -48,34 +81,6 @@ static function<double(double)> funcActivation[16] = {
                 return x + 1 / 2;
         } // 14
     };
-static double fixExp(double x)
-{ // fix exponent
-    if (x <= -10)
-        return exp(-10);
-    if (x >= 10)
-        return exp(10);
-    return exp(x);
-}
-static double fixLog(double x)
-{ // fix log
-    if (x <= 0)
-        return 0;
-    return log(x);
-}
-static double fixPow(double x, double y)
-{ // fix pow
-    double result = pow(x, y);
-    if (result == 0 && x != 0)
-        return 0;
-    if (abs(result) > 1e50)
-    {
-        if (result > 0)
-            return 1e50;
-        else
-            return -1e50;
-    }
-    return pow(x, y);
-}
 
 
 

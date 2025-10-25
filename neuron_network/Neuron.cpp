@@ -72,7 +72,8 @@ void Neuron::setWeights(double *coef, int &cursor)
     { // Если уже были коэффициенты, то удаляем их
         weights = new double[amountInp + 1];
     }
-    if (weightsRNN == nullptr){
+    
+    if (weightsRNN == nullptr) {
         weightsRNN = new double[amountInpRNN];
     }
 

@@ -7,6 +7,15 @@ set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_BUILD_TYPE Debug)
 add_compile_options(-O0 -g3)  # Отключаем оптимизации
 
+
+# Add include directory
+include_directories(include)
+
+# Add source files
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+
+
+
 add_executable(Source
     Source.cpp
     neuron_network/Tree.cpp

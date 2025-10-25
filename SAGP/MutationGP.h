@@ -79,9 +79,6 @@ class PointMutation : public MutationGP {
 
 		}
 
-		mt19937 gen(rand());
-		gen.seed(rand());
-
 		double mut = gen() % 1000000 / 1000000.0;
 
 		if (probability > mut) {
@@ -131,6 +128,9 @@ public:
 				node->randFunc();
 			}
 		}
+		int nodes = 0, lvl = 0;
+		ind.recountLayers(lvl);
+		ind.countNodes(nodes);
 
 		
 	}

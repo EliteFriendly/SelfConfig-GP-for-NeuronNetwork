@@ -46,7 +46,7 @@ protected:
 				}
 				if (node1->getLeft() != nullptr and i <= node1->getLeft()->getNumNodes()) {
 					//Проверка что оба узла хранят одну функцию
-					if ((node1->getLastVertice() == node2->getLastVertice())) {
+					if ((node1->getUnar() == node2->getUnar()) and (node1->getLastVertice() == node2->getLastVertice())) {
 						node1 = node1->getLeft();//Идем по маршруту и там и сям
 						node2 = node2->getLeft();
 						arrayReach[node1->getNumNodes()] = 1;//Пройденный узел отмечаем
@@ -78,7 +78,7 @@ protected:
 				}
 				//Аналогично но справа
 				if (node1->getRight() != nullptr and i <= node1->getRight()->getNumNodes()) {
-					if ((node1->getLastVertice() == node2->getLastVertice())) {
+					if ((node1->getUnar() == node2->getUnar()) and (node1->getLastVertice() == node2->getLastVertice())) {
 						node1 = node1->getRight();
 						node2 = node2->getRight();
 						arrayReach[node1->getNumNodes()] = 1;

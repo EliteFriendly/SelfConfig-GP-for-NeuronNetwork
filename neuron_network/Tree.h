@@ -237,9 +237,17 @@ public:
                 if (network[i][j].getUseFunc() == -1 or network[i][j].getInputBranch())
                     continue; // Пропускаем неиспользуемые нейроны и входные нейроны
                 double* coef = network[i][j].getWeights();
-
+                
                 for (int k = 0; k < network[i][j].getAmountInp() + 1; k++)
                     ss << coef[k] << " ";
+                if (network[i][j].getHaveRNN()) {
+                    ss << endl << "RNN: ";
+                    coef = network[i][j].getWeightsRNN();
+                    for (int k = 0; k < network[i][j].getAmountInpRNN(); k++)
+                        ss << coef[k] << " ";
+                    ss << endl<<"NN: ";
+                }
+                
             }
         }
         for (int i = 0; i < ammOutputs; i++)
@@ -256,6 +264,10 @@ public:
     bool getLastVertice()
     {
         return lastVertice;
+    }
+    bool getUnar()
+    {
+        return unarFuncUs;
     }
 
     void countNodes(int&);
@@ -278,44 +290,7 @@ public:
         return ammInputs;
     }
 
-    ~Tree()
-    {
-        if (network != nullptr)
-        {
-            if (!lastVertice)
-                for (int i = 0; i < ammLayers; i++)
-                    delete[] network[i];
-            delete[] network;
-            network = nullptr;
-        }
-
-        if (output != nullptr)
-        {
-            delete[] output;
-            output = nullptr;
-        }
-        if (ammNeuron != nullptr)
-        {
-            delete[] ammNeuron;
-            ammNeuron = nullptr;
-        }
-        if (left != nullptr)
-        {
-            delete left;
-            left = nullptr;
-        }
-        if (right != nullptr)
-        {
-            delete right;
-            right = nullptr;
-        }
-        if (coordRNN_firstL != nullptr) {
-            for (int i = 0; i < 2; i++)
-                delete[] coordRNN_firstL[i];
-            delete[] coordRNN_firstL;
-            coordRNN_firstL = nullptr;
-        }
-    }
+    
     void replaceNode(int , Tree&);
     void changeNode(int , Tree&);
 
@@ -331,7 +306,19 @@ public:
         else if (inputBranch)
             numberFunc = 0; // Случай сложения узлов для входной ветви
         else
-            numberFunc = gen() % 2;
+            if (unarFuncUs) {
+                if (coordRNN_firstL != nullptr) {
+                    for (int i = 0; i < 2; i++)
+                        delete[] coordRNN_firstL[i];
+                    delete[] coordRNN_firstL;
+                    coordRNN_firstL = nullptr;
+                    amRNN = 0;
+                }
+            }
+            else {
+                numberFunc = gen() % 2;
+            }
+            
     }
 
     Tree* getLeft()
@@ -660,5 +647,44 @@ public:
         }
 
         return *this;
+    }
+
+    ~Tree()
+    {
+        if (network != nullptr)
+        {
+            if (!lastVertice)
+                for (int i = 0; i < ammLayers; i++)
+                    delete[] network[i];
+            delete[] network;
+            network = nullptr;
+        }
+
+        if (output != nullptr)
+        {
+            delete[] output;
+            output = nullptr;
+        }
+        if (ammNeuron != nullptr)
+        {
+            delete[] ammNeuron;
+            ammNeuron = nullptr;
+        }
+        if (left != nullptr)
+        {
+            delete left;
+            left = nullptr;
+        }
+        if (right != nullptr)
+        {
+            delete right;
+            right = nullptr;
+        }
+        if (coordRNN_firstL != nullptr) {
+            for (int i = 0; i < 2; i++)
+                delete[] coordRNN_firstL[i];
+            delete[] coordRNN_firstL;
+            coordRNN_firstL = nullptr;
+        }
     }
 };

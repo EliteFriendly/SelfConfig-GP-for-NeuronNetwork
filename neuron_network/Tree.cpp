@@ -177,7 +177,7 @@ Tree::Tree(int d, int ammInput, bool inputBranch) : inputBranch(inputBranch), am
     }
     else
     {
-        numberFunc = gen() % 3;
+        numberFunc = gen()% 3;
         if (numberFunc == 2)
         {
             unarFuncUs = true;
@@ -217,7 +217,7 @@ string Tree::getFunc()
     else
     {
         if (unarFuncUs){
-            ss << strUnaryFunc[numberFunc - amBinaryFunc - 1];//Потому что в этой переменной хранятся все функции
+            ss << strUnaryFunc[numberFunc - amUnaryFunc - 1];//Потому что в этой переменной хранятся все функции
             ss << '(';
             ss << right->getFunc();
             ss << ')';
@@ -262,8 +262,9 @@ void Tree::doHiddenNeuron()
         delete[] ammNeuron;
         ammNeuron = nullptr;
     }
-
-    left->doHiddenNeuron();
+    if (left != nullptr) {
+        left->doHiddenNeuron();
+    }
     right->doHiddenNeuron();
     if (numberFunc == 0)
     { // Случай сложения узлов
@@ -419,9 +420,8 @@ void Tree::doHiddenNeuron()
         delete[] coordXOutput;
         delete[] coordYOutput;
     }
-    if (numberFunc == 3)
-        //Случай реккурсивной связи (унарная функция только с правой веткой работает)
-    {
+    if (numberFunc == 2)
+    {//Случай реккурсивной связи (унарная функция только с правой веткой работает)
         int maxAmmNeuron = 0;
         ammLayers = right->ammLayers;
         ammNeuron = new int[ammLayers];
@@ -545,9 +545,6 @@ void Tree::doHiddenNeuron()
             }
             network[coordRNN_firstL[0][i]][coordRNN_firstL[1][i]].addConnectRNN(coordXOutput[i], coordYOutput[i], coordRNN_firstL[0][i], coordRNN_firstL[1][i]);
         }
-        delete[] flag;
-        
-
 
         delete[] coordXOutput;
         delete[] coordYOutput;
@@ -615,12 +612,16 @@ double* Tree::getValue(double* x)
                 continue;
             }
             // В случае если это обычный нейрон, то заполняем его входные значения
-            double* input = new double[network[i][j].getAmountInp()]; // Заполняется элементами,
+            double* input = new double[network[i][j].getAmountInp() + network[i][j].getAmountInpRNN()]; // Заполняется элементами,
             // которые будут подаваться
             // на вход в нейрон
             for (int w = 0; w < network[i][j].getAmountInp(); w++)
             {
                 input[w] = res[i + network[i][j].getCoord()[w][0]][j + network[i][j].getCoord()[w][1]];
+            }
+            //Случай для RNN
+            for (int w = 0; w < network[i][j].getAmountInpRNN(); w++) {
+                input[w + network[i][j].getAmountInp()] = network[i + network[i][j].getcoordRNNInputs()[w][0]][j + network[i][j].getcoordRNNInputs()[w][1]].getValueRNN();
             }
             res[i][j] = network[i][j].getValue(funcActivation[network[i][j].getUseFunc()] ,
                 input); // Динамически заполняем матрицу полученными значениями
@@ -688,13 +689,25 @@ void Tree::changeNode(int search,
         else
         {
 
-            numberFunc = newNode.getNumFunc();
-            if (left != nullptr)
-                delete left;
-            left = new Tree;
-            // left->operator=(*copy.left);
-            *left = Tree(*(newNode.left));
-            left->numNodes = -1; // Сделано для того, чтобы не было изменений в этой ветви
+            if (newNode.getUnar()) {
+				unarFuncUs = true;
+				numberFunc = newNode.getNumFunc();
+				delete left;
+				left = nullptr;
+			}
+            else {
+                unarFuncUs = false;
+                numberFunc = newNode.getNumFunc();
+                if (left == nullptr) {
+                    left = new Tree;
+                    //left->operator=(*copy.left);
+                    *left = Tree(*(newNode.left));
+                    left->numNodes = -1; // Сделано для того, чтобы не было изменений в этой ветви
+                }
+                
+
+            }
+           
         }
         return;
     }
@@ -713,7 +726,7 @@ void Tree::trainWithDE(SampleStorage &data, int size, ComputingLimitation &cLimi
         for (int j = 0; j < ammNeuron[i]; j++)
         {
             if (network[i][j].getAmountInp() != 0)
-                amWeights += network[i][j].getAmountInp() + 1;
+                amWeights += network[i][j].getAmountInp() + 1 + network[i][j].getAmountInpRNN();
         }
     for (int i = 0; i < ammOutputs; i++)
         amWeights += output[i].getAmountInp() + 1;
