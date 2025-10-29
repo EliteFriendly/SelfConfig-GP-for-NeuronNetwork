@@ -6,6 +6,7 @@
 #include <time.h>
 #include <vector>
 #include "general/sample_storage.h"
+#include "general/general_var.h"
 using namespace std;
 int dimension = 4;
 const double PI = 3.1415926535;
@@ -55,7 +56,7 @@ double funcRosenbrock(double *x)
 
                 mt19937_64 gen(rd());
                 ГЕНЕРАТОР БЕЗ ОГРАНИЧЕНИЙ
-
+                НО ВРОДЕ ГЕНЕРИРУЕТ И ОТРИЦАТЕЛЬНЫЕ ЧИСЛА
 
 *Из за чего алгоритм может перестать работать:
 Изменен способ копирования веток
@@ -114,7 +115,7 @@ void test(string path, int size, int dim, int amOutputs, int number, int depth)
         // cout << endl;
     }
     file.close();
-    SampleStorage storage(size, dimension - 1, data, 0.75, "class"); // 75% for training
+    SampleStorage storage(size, dimension - 1, data, 100, "class"); // 75% for training
 
     int treeDepth = depth; // depth of tree
 
@@ -133,28 +134,84 @@ void test(string path, int size, int dim, int amOutputs, int number, int depth)
     // fileOut << proba.getError(dataTest, size * 0.25) << endl;
     fileOut << proba.getError(storage.getTrainData(), storage.getTrainSize()) << endl;
     fileOut << proba.getError(storage.getTestData(), storage.getTestSize()) << endl;
-    proba.saveBestIndividualtoFile();
+    //proba.saveBestIndividualtoFile();
     fileOut.close();
 }
 
 int main()
 {
-
+    setlocale(0,"");
     clock_t tStart = clock();
 
-    string path[3] = {"test/Iris.txt", "test/wine.txt", "test/breast_cancer.txt"};
-    int size[3] = {150, 178, 569};
-    int amOutputs[3] = {3, 3, 2};
-    int dimension[3] = {4 + 1, 13 + 1, 30 + 1};
-    int depth[3] = {3, 3, 3};
+    std::vector<std::string> file_names = {
+    "I_6_20b.txt",
+    "I_8_14.txt", 
+    "I_12_1.txt",
+    "I_12_2.txt",
+    "I_12_4.txt",
+    "I_14_3.txt",
+    "I_14_4.txt",
+    "I_15_3x.txt",
+    "I_15_10.txt",
+    "I_18_4.txt",
+    "I_24_6.txt",
+    "I_32_5.txt"
+    };
 
-    for (int i = 0; i < 1; i++)
+// Массив количества изменяемых параметров для каждой задачи
+    std::vector<int> parameter_counts = {
+    2,  // I.6.20b: theta, t
+    4,  // I.8.14: x1, y1, x2, y2
+    3,  // I.12.1: q1, q2, r
+    4,  // I.12.2: q, E, v, B
+    2,  // I.12.4: mu, r
+    2,  // I.14.3: m, h
+    2,  // I.14.4: k, x
+    3,  // I.15.3x: x1, u, t
+    2,  // I.15.10: m, v
+    4,  // I.18.4: m, v, r, theta
+    2,  // I.24.6: n, theta2
+    2   // I.32.5: q, a
+    };
+    string st = "test/" + file_names[0];
+    //cout << st << endl;
+    ifstream file(st);
+    if (!file.is_open())
     {
-        for (int j = 0; j < 1; j++)
-        {
-            test(path[i], size[i], dimension[i], amOutputs[i], j + 10 * i, depth[i]);
-        }
+        cerr << "Error opening files" << endl;
+        exit(1);
     }
+    int size = 1000;
+    dimension = parameter_counts[0];
+    double** data = new double* [size];
+    for (int i = 0; i < size; i++)
+    {
+
+        data[i] = new double[dimension];
+
+        for (int j = 0; j < dimension; j++)
+        {
+            file >> data[i][j];
+            if (file.peek() == ',')
+                file.ignore();
+            // cout << data[i][j] << " ";
+        }
+
+
+        // cout << endl;
+    }
+    int treeDepth = 3;
+    file.close();
+    AdaptiveGeneticProgramming proba(treeDepth, "reg");
+    proba.numFile(123);
+    proba.startTrain(data , dimension, 1 , size , 10 , 10);
+    Tree best = proba.getBest();
+    cout << best.getFunc() << endl;
+    cout << best.getMatrix() << endl;
+    cout << best.getCoordStr() << endl;
+    cout << proba.getError(data,size)<<endl;
+    
+
 
     cout << "Good";
 

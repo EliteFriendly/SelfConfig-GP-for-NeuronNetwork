@@ -2,7 +2,7 @@
 #include <iostream>
 #include "..\\neuron_network\\Tree.h"
 #include <vector>
-#include <random>
+#include "../general/general_var.h"
 
 using namespace std;
 
@@ -29,7 +29,7 @@ public:
 	void doMutChild(Tree& ind) {
 
 		int r = ind.getNumNodes();
-		int chosenNode = rand() % r;
+		int chosenNode = gen() % r;
 		bool chosenInputBranch = false;
 		if (chosenNode <= ind.getLeft()->getNumNodes()) {
 			chosenInputBranch = true;
@@ -78,9 +78,6 @@ class PointMutation : public MutationGP {
 			exit(0);
 
 		}
-
-		mt19937 gen(rand());
-		gen.seed(rand());
 
 		double mut = gen() % 1000000 / 1000000.0;
 
@@ -131,6 +128,9 @@ public:
 				node->randFunc();
 			}
 		}
+		int nodes = 0, lvl = 0;
+		ind.recountLayers(lvl);
+		ind.countNodes(nodes);
 
 		
 	}

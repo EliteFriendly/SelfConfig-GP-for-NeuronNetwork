@@ -10,7 +10,8 @@
 #include <math.h>
 #include <string>
 #include <vector>
-
+#include <random>
+#include "../general/general_var.h"
 /*
 Заходя суда помни!
 номер слоя по x
@@ -28,44 +29,20 @@ vy
 
 */
 
-static double fixExp(double x)
-{ // fix exponent
-    if (x <= -10)
-        return exp(-10);
-    if (x >= 10)
-        return exp(10);
-    return exp(x);
-}
-static double fixLog(double x)
-{ // fix log
-    if (x <= 0)
-        return 0;
-    return log(x);
-}
-static double fixPow(double x, double y)
-{ // fix pow
-    double result = pow(x, y);
-    if (result == 0 && x != 0)
-        return 0;
-    if (abs(result) > 1e50)
-    {
-        if (result > 0)
-            return 1e50;
-        else
-            return -1e50;
-    }
-    return pow(x, y);
-}
+
+
+
+
 
 using namespace std;
 
 class Tree
 {
-  private:
+private:
     int numberFunc = -1; // Номер функции который используется в узле, в вершинах
-                         // функция активации
+    // функция активации
     int numVertices = 0; // Количество вершин где нужно настраивать коэффициенты
-                         // (не используется)
+    // (не используется)
     int numNodes = -1;   // Количество узлов ниже
     int layerLevel = -1; // На каком уровне относительно начала находится узел
     int size = -1;       // Количество данных
@@ -79,70 +56,39 @@ class Tree
     bool lastVertice = false; // Последняя ли вершина
     bool inputBranch = false; // Является ли узел ветвью входа
     bool mainNode = false;    // Начальный ли узел
+    bool unarFuncUs = false;  // Является ли узел функцией унарной
+
+    //Связано с рекуррентной связью
+    int** coordRNN_firstL = nullptr; //x,y: [2][ammRNN] координаты нейронов без входов с реккурентной связью, которые используются
+    int amRNN = 0; //количество нейронов реккурентной связи
 
     // Связано с пригодностью
     double ef = 1;      // Коэффициент при RMSE
     double nf = 0;      // Коэффициент при количестве узлов
     int maxNodes = 100; // Максимальное количество узлов в дереве
 
-    int *ammNeuron = nullptr; // Количество узлов в слое
+    int* ammNeuron = nullptr; // Количество узлов в слое
     int ammLayers = 0;        // Количество слоев
 
-    Neuron **network = nullptr; // Сеть нейронов без выходных
+    Neuron** network = nullptr; // Сеть нейронов без выходных
 
-    Neuron *output = nullptr; // Нейроны на выход, без функции активации
+    Neuron* output = nullptr; // Нейроны на выход, без функции активации
 
-    Tree *left = nullptr;
-    Tree *right = nullptr;
+    Tree* left = nullptr;
+    Tree* right = nullptr;
 
-    string typeTask = "reg";                   // Тип задачи, регрессия или классификация
-    vector<string> strBinaryFunc = {"+", ">"}; // Символьный вывод функции
+    string typeTask = "reg";// Тип задачи, регрессия или классификация
 
-    int amFuncActive = 15; // Количество функций активации
-    function<double(double)> funcActivation[16] = {
-        [](double x) { return x; },      // 0
-        [](double x) { return sin(x); }, // 1
-        [](double x) {
-            if (x < -1)
-                return -1.0;
-            if (x > 1)
-                return 1.0;
-            else
-                return x;
-        },                                                // 2
-        [](double x) { return 2 / (1 + fixExp(x)) - 1; }, // 3
-        [](double x) { return fixExp(x); },               // 4
-        [](double x) { return abs(x); },                  // 5
-        [](double x) { return 1 - fixExp(x); },           // 6
-        [](double x) { return 0; },                       // 7
-        [](double x) { return fixPow(x, 2); },            // 8
-        [](double x) { return fixPow(x, 3); },            // 9
-        [](double x) {
-            if (x == 0)
-                return 0.0;
-            return fixPow(x, -1);
-        },                                             // 10
-        [](double x) { return 1; },                    // 11
-        [](double x) { return 1 / (1 + fixExp(-x)); }, // 12
-        [](double x) { return fixExp(-(x * x) / 2); }, // 13
-        [](double x) {
-            if (x < -1 / 2)
-                return -1.0;
-            if (x > 1 / 2)
-                return 1.0;
-            else
-                return x + 1 / 2;
-        } // 14
-    };
+
+
 
     void doHiddenNeuron();
 
-  public:
+public:
     Tree()
-    {
-    }
-    Tree(int depth, int ammInput, bool inputBranch);
-    Tree(const Tree &copy)
+    {}
+    Tree(int depth , int ammInput , bool inputBranch);
+    Tree(const Tree& copy)
     {
 
         if (copy.output != nullptr)
@@ -182,11 +128,11 @@ class Tree
                     delete[] network[i];
                 delete[] network;
             }
-            network = new Neuron *[copy.ammLayers];
+            network = new Neuron * [copy.ammLayers];
             for (int i = 0; i < copy.ammLayers; i++)
             {
                 network[i] = new Neuron[ammNeuron[i]]; // Обращаемся к своему, потому
-                                                       // что уже скопировали
+                // что уже скопировали
                 for (int j = 0; j < ammNeuron[i]; j++)
                     network[i][j] = copy.network[i][j];
             }
@@ -198,7 +144,23 @@ class Tree
             delete[] network;
             network = nullptr;
         }
+        if (copy.coordRNN_firstL != nullptr) {
+            if (coordRNN_firstL != nullptr) {
+                for (int i = 0; i < 2; i++)
+                    delete[] coordRNN_firstL[i];
+                delete[] coordRNN_firstL;
+            }
+            amRNN = copy.amRNN;
+            coordRNN_firstL = new int* [2];
+            for (int i = 0; i < 2; i++) {
+                coordRNN_firstL[i] = new int[amRNN];
+                for (int j = 0; j < amRNN; j++) {
+                    coordRNN_firstL[i][j] = copy.coordRNN_firstL[i][j]; 
+                }
+            }
+        }
 
+        unarFuncUs = copy.unarFuncUs;
         typeTask = copy.typeTask;
         ammOutputs = copy.ammOutputs;
         ammLayers = copy.ammLayers;
@@ -243,15 +205,15 @@ class Tree
         }
     }
 
-    Tree(int d, int numInputs, int numOutputs, string typeTask);
+    Tree(int d , int numInputs , int numOutputs , string typeTask);
 
-    void calcFitness(double **x, int size);
+    void calcFitness(double** x , int size);
 
     string getMatrix();
 
     void doNeuronNetwork();
 
-    void setCoefficientsFitness(double ef, double nf, int maxN)
+    void setWeightsFitness(double ef , double nf , int maxN)
     {
         this->ef = ef;
         this->nf = nf;
@@ -274,17 +236,25 @@ class Tree
             {
                 if (network[i][j].getUseFunc() == -1 or network[i][j].getInputBranch())
                     continue; // Пропускаем неиспользуемые нейроны и входные нейроны
-                double *coef = network[i][j].getCoefficients();
-
+                double* coef = network[i][j].getWeights();
+                
                 for (int k = 0; k < network[i][j].getAmountInp() + 1; k++)
                     ss << coef[k] << " ";
+                if (network[i][j].getHaveRNN()) {
+                    ss << endl << "RNN: ";
+                    coef = network[i][j].getWeightsRNN();
+                    for (int k = 0; k < network[i][j].getAmountInpRNN(); k++)
+                        ss << coef[k] << " ";
+                    ss << endl<<"NN: ";
+                }
+                
             }
         }
         for (int i = 0; i < ammOutputs; i++)
         {
             if (output[i].getUseFunc() == -1 or output[i].getInputBranch())
                 continue; // Пропускаем неиспользуемые нейроны и входные нейроны
-            double *coef = output[i].getCoefficients();
+            double* coef = output[i].getWeights();
             for (int k = 0; k < output[i].getAmountInp() + 1; k++)
                 ss << coef[k] << " ";
         }
@@ -295,17 +265,21 @@ class Tree
     {
         return lastVertice;
     }
+    bool getUnar()
+    {
+        return unarFuncUs;
+    }
 
-    void countNodes(int &);
+    void countNodes(int&);
     void recountLayers(int);
 
-    void changeCoef(double *);
+    void changeCoef(double*);
     int getNumVertices();
     int getNumFunc()
     {
         return numberFunc;
     }
-    double *getValue(double *x);
+    double* getValue(double* x);
     int getNumNodes()
     {
         return numNodes;
@@ -316,63 +290,44 @@ class Tree
         return ammInputs;
     }
 
-    ~Tree()
-    {
-        if (network != nullptr)
-        {
-            if (!lastVertice)
-                for (int i = 0; i < ammLayers; i++)
-                    delete[] network[i];
-            delete[] network;
-            network = nullptr;
-        }
+    
+    void replaceNode(int , Tree&);
+    void changeNode(int , Tree&);
 
-        if (output != nullptr)
-        {
-            delete[] output;
-            output = nullptr;
-        }
-        if (ammNeuron != nullptr)
-        {
-            delete[] ammNeuron;
-            ammNeuron = nullptr;
-        }
-        if (left != nullptr)
-        {
-            delete left;
-            left = nullptr;
-        }
-        if (right != nullptr)
-        {
-            delete right;
-            right = nullptr;
-        }
-    }
-    void replaceNode(int, Tree &);
-    void changeNode(int, Tree &);
-
-    void trainWithDE(SampleStorage &data, int size, ComputingLimitation &cLimitation);
+    void trainWithDE(SampleStorage& data , int size , ComputingLimitation& cLimitation);
 
     void randFunc()
     { // Используется для оператора мутации
         if (lastVertice)
             if (inputBranch)
-                numInput = rand() % ammInputs;
+                numInput = gen() % ammInputs;
             else
-                numberFunc = rand() % amFuncActive;
+                numberFunc = gen() % amFuncActive;
         else if (inputBranch)
             numberFunc = 0; // Случай сложения узлов для входной ветви
         else
-            numberFunc = rand() % 2;
+            if (unarFuncUs) {
+                if (coordRNN_firstL != nullptr) {
+                    for (int i = 0; i < 2; i++)
+                        delete[] coordRNN_firstL[i];
+                    delete[] coordRNN_firstL;
+                    coordRNN_firstL = nullptr;
+                    amRNN = 0;
+                }
+            }
+            else {
+                numberFunc = gen() % 2;
+            }
+            
     }
 
-    Tree *getLeft()
+    Tree* getLeft()
     {
         if (left == nullptr)
             return nullptr;
         return left;
     }
-    Tree *getRight()
+    Tree* getRight()
     {
         if (right == nullptr)
             return nullptr;
@@ -420,14 +375,14 @@ class Tree
         file << "Coordinates: " << endl;
         file << this->getMatrix() << endl;
 
-        file << "Coefficients: " << endl;
+        file << "Weights: " << endl;
         for (int i = 0; i < ammLayers; i++)
         {
             for (int j = 0; j < ammNeuron[i]; j++)
             {
                 if (network[i][j].getUseFunc() == -1 or network[i][j].getInputBranch())
                     continue; // Пропускаем неиспользуемые нейроны и входные нейроны
-                double *coef = network[i][j].getCoefficients();
+                double* coef = network[i][j].getWeights();
 
                 for (int k = 0; k < network[i][j].getAmountInp() + 1; k++)
                     file << coef[k] << " ";
@@ -437,7 +392,7 @@ class Tree
         {
             if (output[i].getUseFunc() == -1 or output[i].getInputBranch())
                 continue; // Пропускаем неиспользуемые нейроны и входные нейроны
-            double *coef = output[i].getCoefficients();
+            double* coef = output[i].getWeights();
             for (int k = 0; k < output[i].getAmountInp() + 1; k++)
                 file << coef[k] << " ";
         }
@@ -456,7 +411,7 @@ class Tree
             return;
         }
         string line;
-        while (getline(file, line))
+        while (getline(file , line))
         {
             if (line.find("fitness:") != string::npos)
             {
@@ -502,7 +457,7 @@ class Tree
                         delete[] network[i];
                     delete[] network;
                 }
-                network = new Neuron *[ammLayers];
+                network = new Neuron * [ammLayers];
                 for (int i = 0; i < ammLayers; i++)
                     network[i] = nullptr; // Инициализируем указатели
             }
@@ -516,7 +471,7 @@ class Tree
             {
                 for (int i = 0; i < ammLayers; i++)
                 {
-                    getline(file, line);
+                    getline(file , line);
                     stringstream ss(line);
                     for (int j = 0; j < ammNeuron[i]; j++)
                     {
@@ -526,7 +481,7 @@ class Tree
                         {
                             int useFunc;
                             ss >> useFunc;
-                            network[i][j] = Neuron(true, useFunc); // Входной нейрон
+                            network[i][j] = Neuron(true , useFunc); // Входной нейрон
                         }
                         else
                         {
@@ -538,9 +493,9 @@ class Tree
             }
             else if (line.find("Coordinates:") != string::npos)
             {
-                getline(file, line);
+                getline(file , line);
             }
-            else if (line.find("Coefficients:") != string::npos)
+            else if (line.find("Weights:") != string::npos)
             {
                 int cursor = 0;
                 for (int i = 0; i < ammLayers; i++)
@@ -551,10 +506,10 @@ class Tree
                         {
                             continue; // Пропускаем неиспользуемые нейроны и входные нейроны
                         }
-                        double *coef = new double[network[i][j].getAmountInp() + 1];
+                        double* coef = new double[network[i][j].getAmountInp() + 1];
                         for (int k = 0; k < network[i][j].getAmountInp() + 1; k++)
                             file >> coef[k];
-                        network[i][j].setCoefficients(coef, cursor);
+                        network[i][j].setWeights(coef , cursor);
                         delete[] coef;
                     }
                 }
@@ -562,10 +517,10 @@ class Tree
                 {
                     if (output[i].getUseFunc() == -1 or output[i].getInputBranch())
                         continue; // Пропускаем неиспользуемые нейроны и входные нейроны
-                    double *coef = new double[output[i].getAmountInp() + 1];
+                    double* coef = new double[output[i].getAmountInp() + 1];
                     for (int k = 0; k < output[i].getAmountInp() + 1; k++)
                         file >> coef[k];
-                    output[i].setCoefficients(coef, cursor);
+                    output[i].setWeights(coef , cursor);
                     delete[] coef;
                 }
             }
@@ -574,7 +529,7 @@ class Tree
         // Инициализация сети нейронов
     }
 
-    Tree operator=(const Tree &copy)
+    Tree operator=(const Tree& copy)
     {
 
         if (copy.output != nullptr)
@@ -614,11 +569,11 @@ class Tree
                     delete[] network[i];
                 delete[] network;
             }
-            network = new Neuron *[copy.ammLayers];
+            network = new Neuron * [copy.ammLayers];
             for (int i = 0; i < copy.ammLayers; i++)
             {
                 network[i] = new Neuron[ammNeuron[i]]; // Обращаемся к своему, потому
-                                                       // что уже скопировали
+                // что уже скопировали
                 for (int j = 0; j < ammNeuron[i]; j++)
                     network[i][j] = copy.network[i][j];
             }
@@ -630,7 +585,24 @@ class Tree
             delete[] network;
             network = nullptr;
         }
+        if (copy.coordRNN_firstL != nullptr) {
+            if (coordRNN_firstL != nullptr) {
+                for (int i = 0; i < 2; i++)
+                    delete[] coordRNN_firstL[i];
+                delete[] coordRNN_firstL;
+            }
+            amRNN = copy.amRNN;
+            coordRNN_firstL = new int* [2];
+            for (int i = 0; i < 2; i++) {
+                coordRNN_firstL[i] = new int[amRNN];
+                for (int j = 0; j < amRNN; j++) {
+                    coordRNN_firstL[i][j] = copy.coordRNN_firstL[i][j]; 
+                }
+            }
+        }
 
+
+        unarFuncUs = copy.unarFuncUs;
         typeTask = copy.typeTask;
         ammOutputs = copy.ammOutputs;
         ammLayers = copy.ammLayers;
@@ -675,5 +647,44 @@ class Tree
         }
 
         return *this;
+    }
+
+    ~Tree()
+    {
+        if (network != nullptr)
+        {
+            if (!lastVertice)
+                for (int i = 0; i < ammLayers; i++)
+                    delete[] network[i];
+            delete[] network;
+            network = nullptr;
+        }
+
+        if (output != nullptr)
+        {
+            delete[] output;
+            output = nullptr;
+        }
+        if (ammNeuron != nullptr)
+        {
+            delete[] ammNeuron;
+            ammNeuron = nullptr;
+        }
+        if (left != nullptr)
+        {
+            delete left;
+            left = nullptr;
+        }
+        if (right != nullptr)
+        {
+            delete right;
+            right = nullptr;
+        }
+        if (coordRNN_firstL != nullptr) {
+            for (int i = 0; i < 2; i++)
+                delete[] coordRNN_firstL[i];
+            delete[] coordRNN_firstL;
+            coordRNN_firstL = nullptr;
+        }
     }
 };

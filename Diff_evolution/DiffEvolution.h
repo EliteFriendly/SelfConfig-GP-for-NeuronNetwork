@@ -7,8 +7,7 @@
 #include <ctime>
 #include <functional>
 #include <iostream>
-#include <thread>
-#include <vector>
+#include "../general/general_var.h"
 
 using namespace std;
 

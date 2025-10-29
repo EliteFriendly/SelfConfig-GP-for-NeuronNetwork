@@ -2,7 +2,7 @@
 #include <iostream>
 #include "..\\neuron_network\\Tree.h"
 #include <vector>
-#include <random>
+#include "../general/general_var.h"
 using namespace std;
 
 class CrossoverGP
@@ -46,7 +46,7 @@ protected:
 				}
 				if (node1->getLeft() != nullptr and i <= node1->getLeft()->getNumNodes()) {
 					//Проверка что оба узла хранят одну функцию
-					if ((node1->getLastVertice() == node2->getLastVertice())) {
+					if ((node1->getUnar() == node2->getUnar()) and (node1->getLastVertice() == node2->getLastVertice())) {
 						node1 = node1->getLeft();//Идем по маршруту и там и сям
 						node2 = node2->getLeft();
 						arrayReach[node1->getNumNodes()] = 1;//Пройденный узел отмечаем
@@ -78,7 +78,7 @@ protected:
 				}
 				//Аналогично но справа
 				if (node1->getRight() != nullptr and i <= node1->getRight()->getNumNodes()) {
-					if ((node1->getLastVertice() == node2->getLastVertice())) {
+					if ((node1->getUnar() == node2->getUnar()) and (node1->getLastVertice() == node2->getLastVertice())) {
 						node1 = node1->getRight();
 						node2 = node2->getRight();
 						arrayReach[node1->getNumNodes()] = 1;
@@ -119,11 +119,11 @@ protected:
 		int secNode;
 		if (inputBranch) {
 			secNode = second.getLeft()->getNumNodes();
-			return rand() % (secNode + 1);//????
+			return gen() % (secNode + 1);//????
 		}
 		else {
 			secNode = second.getRight()->getNumNodes() - second.getLeft()->getNumNodes();//Чтобы узнать сколько узлов в правой ветке
-			return rand() % (secNode)+second.getLeft()->getNumNodes() + 1;
+			return gen() % (secNode)+second.getLeft()->getNumNodes() + 1;
 		}
 
 	}
@@ -146,7 +146,7 @@ public:
 
 	Tree getChild(Tree &first, Tree &second) {
 
-		if (rand() % 2) {
+		if (gen() % 2) {
 			return first;
 		}
 		else
@@ -167,7 +167,7 @@ class StandartCrossover : public CrossoverGP {
 
 		Tree child(first);
 		int r = child.getNumNodes();
-		int chosenNode = rand() % r;
+		int chosenNode = gen() % r;
 		bool chosenInputBranch = false;
 		if (chosenNode <= child.getLeft()->getNumNodes()) {
 			chosenInputBranch = true;
@@ -219,10 +219,10 @@ public:
 
 		Tree child(first);
 		findReach(child, second);
-		int chosenNode = rand() % child.getNumNodes();
+		int chosenNode = gen() % child.getNumNodes();
 
 		while (!arrayReach[chosenNode]) {
-			chosenNode = rand() % child.getNumNodes();
+			chosenNode = gen() % child.getNumNodes();
 		}
 
 

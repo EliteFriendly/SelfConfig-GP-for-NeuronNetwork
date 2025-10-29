@@ -4,14 +4,14 @@ IndividualDiffEvolution DiffEvolution::crossover(IndividualDiffEvolution donor)
 {
 
     int ammount = 0;         // Количество раз когда поменялся вектор
-    int number = rand() % N; // Номер родителя
+    int number = gen() % N; // Номер родителя
     double rep;              // Вероятность поменять координаты
     double *coordinates = donor.getCoordinats();
 
     // Процесс изменения гена
     for (int i = 0; i < ammDimens; i++)
     {
-        rep = rand() % 1000 / 1000.0;
+        rep = gen() % 1000 / 1000.0;
         if (rep < Cr)
         {
             coordinates[i] = arrIndividuals[number].getCoordinats()[i];
@@ -20,7 +20,7 @@ IndividualDiffEvolution DiffEvolution::crossover(IndividualDiffEvolution donor)
     }
     if (ammount == 0)
     { // В случае если ген ни разу не поменялся
-        int ran = rand() % ammDimens;
+        int ran = gen() % ammDimens;
         coordinates[ran] = arrIndividuals[number].getCoordinats()[ran];
     }
     donor.replaceCoordinats(coordinates);
