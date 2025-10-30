@@ -34,7 +34,9 @@ class AdaptiveGeneticProgramming
     int ammInputs;                           // Количество осей или входов
     int ammOutputs;                          // Количество выходов или выходных нейронов
     int size;                                // Количество точек
-    int numberFile = 1;                      // Используется для именовании файла
+    string markFile = "1";                      // Используется для именовании файла
+    bool saveTrail = false; // Используется для сохранения результатов в момент поиска лучшего индивида
+    ofstream fileTrail; // Используется для сохранения результатов в момент поиска лучшего индивида
 
     int ammSel = 5;
     SelectionGP **selection = nullptr;
@@ -209,14 +211,16 @@ class AdaptiveGeneticProgramming
     {
         computingLimitation.setComputingLimitation(limit);
     }
-    void numFile(int num)
+    void numFileAndTrail(string special, bool saveTrail = false)
     {
-        numberFile = num;
+        markFile = special;
+        AdaptiveGeneticProgramming::saveTrail = saveTrail;
+        fileTrail.open("Best/" + markFile + ".txt");
     }
     void saveBestIndividualtoFile()
     {
 
-        bestIndividual.saveNetworkToFile("algorithm_results/best"+to_string(numberFile) + "_best.txt");
+        bestIndividual.saveNetworkToFile("algorithm_results/best"+markFile + "_best.txt");
     }
 
     ~AdaptiveGeneticProgramming()

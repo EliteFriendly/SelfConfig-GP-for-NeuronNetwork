@@ -9,6 +9,11 @@ void AdaptiveGeneticProgramming::findBest()
             bestIndividual = arrayIndividuals[i];
         }
     }
+    if (saveTrail) {
+        
+        fileTrail << bestIndividual.getFitness() << endl;
+    }
+    
 }
 
 void AdaptiveGeneticProgramming::setSelectionsArrays()
@@ -174,11 +179,11 @@ void AdaptiveGeneticProgramming::recalcProbabilities()
 void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOutPuts, int size, int numIndividuals,
                                             int numGeneration)
 {
-    ofstream fGen("algorithm_results/MaxGeneration/ReachedGeneration_" + to_string(numberFile) + ".txt");
-    fSel.open("algorithm_results/Probabilities/ProbabilSel_" + to_string(numberFile) + ".txt");
+    ofstream fGen("algorithm_results/MaxGeneration/ReachedGeneration_" + markFile + ".txt");
+    fSel.open("algorithm_results/Probabilities/ProbabilSel_" + markFile + ".txt");
 
-    fCross.open("algorithm_results/Probabilities/ProbabilCross_" + to_string(numberFile) + ".txt");
-    fMut.open("algorithm_results/Probabilities/ProbabilMut_" + to_string(numberFile) + ".txt");
+    fCross.open("algorithm_results/Probabilities/ProbabilCross_" + markFile + ".txt");
+    fMut.open("algorithm_results/Probabilities/ProbabilMut_" + markFile + ".txt");
 
     saveProbabilities();
 
@@ -200,9 +205,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
     // Set limitations
     if (computingLimitation.getComputingLimitation() == 0)
     {
-        int DEind = 50;
-        int DEgen = 50;
-        computingLimitation.setComputingLimitation(DEind * DEgen * numIndividuals * numGeneration);
+        computingLimitation.setComputingLimitation(numInd * numGen * numIndividuals * numGeneration);
     }
     cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
     // Первая иницилизация поколения
