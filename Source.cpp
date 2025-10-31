@@ -1,17 +1,15 @@
 #include "SAGP/AdaptiveGeneticProgramming.h"
 #include "neuron_network/Tree.h"
-#include <direct.h>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <locale.h>
-#include <sstream>
 #include <time.h>
 #include <vector>
-#include "sample_storage.h"
+#include "general/sample_storage.h"
 using namespace std;
 int dimension = 4;
 const double PI = 3.1415926535;
+static const int DATA_SIZE = 1000;
 
 double func0(double x)
 {
@@ -58,7 +56,7 @@ double funcRosenbrock(double *x)
 
                 mt19937_64 gen(rd());
                 ГЕНЕРАТОР БЕЗ ОГРАНИЧЕНИЙ
-
+                НО ВРОДЕ ГЕНЕРИРУЕТ И ОТРИЦАТЕЛЬНЫЕ ЧИСЛА
 
 *Из за чего алгоритм может перестать работать:
 Изменен способ копирования веток
@@ -89,75 +87,146 @@ double addNoise(double x, int power)
         return x - double(rand() % power + rand() % 1) / 100.0 * x;
 }
 
-void test(string path, int size, int dim, int amOutputs, int number, int depth)
+void test(string path, int dim, string mark)
 {
-
     ifstream file(path);
-    dimension = dim;
     if (!file.is_open())
     {
         cerr << "Error opening files" << endl;
         exit(1);
     }
     // Read data from file
-    double **data = new double *[size];
-    for (int i = 0; i < size; i++)
+    double **data = new double *[DATA_SIZE];
+    for (int i = 0; i < DATA_SIZE; i++)
     {
 
-        data[i] = new double[dimension];
+        data[i] = new double[dim+1];
 
-        for (int j = 0; j < dimension; j++)
+        for (int j = 0; j < dim+1; j++)
         {
             file >> data[i][j];
+            //cout<<data[i][j]<<" ";
             if (file.peek() == ',')
                 file.ignore();
             // cout << data[i][j] << " ";
         }
+        //cout << endl;
 
         // cout << endl;
     }
     file.close();
-    SampleStorage storage(size, dimension - 1, data, 0.75, "class"); // 75% for training
+    SampleStorage storage(DATA_SIZE, dim, data, 0.75, "reg"); // 75% for training
 
-    int treeDepth = depth; // depth of tree
+    int treeDepth = 4; // depth of tree
 
-    ofstream fileOut("algorithm_results/Results/Error" + to_string(number) + ".txt");
+    ofstream fileOut("algorithm_results/Results/Best_" + mark + ".txt");
     if (!fileOut.is_open())
     {
         cout << "Error opening file out" << endl;
         exit(1);
     }
-    cout << "Iteration " << number << endl;
-    AdaptiveGeneticProgramming proba(treeDepth, "class");
-    proba.numFile(number);
-    proba.startTrain(storage.getTrainData(), dimension - 1, amOutputs, storage.getTrainSize(), 30, 30);
+    ofstream filePoints("algorithm_results/Points/" + mark + ".txt");
+    if (!filePoints.is_open())
+    {
+        cout << "Error opening file out" << endl;
+        exit(1);
+    }
+
+    cout << "Iteration " << mark << endl;
+    AdaptiveGeneticProgramming proba(treeDepth, "reg");
+    proba.numFileAndTrail(mark,true);
+    proba.startTrain(data, dim, 1, DATA_SIZE,11,11);
     Tree best = proba.getBest();
     // fileOut << proba.getError(dataTest, size * 0.25) << endl;
-    fileOut << proba.classificationError(storage.getTrainData(), storage.getTrainSize()) << endl;
-    fileOut << proba.classificationError(storage.getTestData(), storage.getTestSize()) << endl;
-    proba.saveBestIndividualtoFile();
+    fileOut << best.getFunc() << endl;
+    fileOut << best.getMatrix() << endl;
     fileOut.close();
-    file.close();
+    for (int i = 0;i < storage.getTestSize();i++) {
+        filePoints << storage.getTestData()[i][dim] << " " << best.getValue(storage.getTestData()[i])[0] << endl;
+    }
+    filePoints.close();
 }
 
 int main()
 {
-
+    setlocale(0,"");
     clock_t tStart = clock();
 
-    string path[3] = {"test/Iris.txt", "test/wine.txt", "test/breast_cancer.txt"};
-    int size[3] = {150, 178, 569};
-    int amOutputs[3] = {3, 3, 2};
-    int dimension[3] = {4 + 1, 13 + 1, 30 + 1};
-    int depth[3] = {3, 4, 5};
+    std::vector<std::string> file_names = {
+        "I_6_2b.txt",
+        "I_8_14.txt", 
+        "I_12_1.txt",
+        "I_12_2.txt",
+        "I_12_4.txt",
+        "I_14_3.txt",
+        "I_14_4.txt",
+        "I_15_3x.txt",
+        "I_15_10.txt",
+        "I_18_4.txt",
+        "I_24_6.txt",
+        "I_32_5.txt"
+    };
 
-    for (int i = 0; i < 3; i++)
+// Массив количества изменяемых параметров для каждой задачи
+    std::vector<int> parameter_counts = {
+        3,  // I.6.2b: 
+        4,  // I.8.14: x1, y1, x2, y2
+        2,  // I.12.1: q1, q2, r
+        4,  // I.12.2: q, E, v, B
+        3,  // I.12.4: mu, r
+        3,  // I.14.3: m, h
+        2,  // I.14.4: k, x
+        4,  // I.15.3x: x1, u, t
+        3,  // I.15.10: m, v
+        4,  // I.18.4: m, v, r, theta
+        4,  // I.24.6: n, theta2
+        4   // I.32.5: q, a
+    };
+    string st = "test/" + file_names[0];
+    //cout << st << endl;
+    ifstream file(st);
+    if (!file.is_open())
     {
-        for (int j = 0; j < 10; j++)
+        cerr << "Error opening files" << endl;
+        exit(1);
+    }
+    
+
+
+    // cout << endl;
+    int l = 8;
+    double* coef = new double[l];
+    for (int i = 0; i < l; i++)
+    {
+        coef[i] = 1;
+    }
+    /*Tree proba(3 , 2 , 1 , "reg");
+    proba.doNeuronNetwork();
+    proba.changeCoef(coef);
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getFunc() << endl;
+    cout << proba.getMatrix() << endl;*/
+
+
+    try {
+    for (int i = 0;i < file_names.size();i++) {
+        for (int r = 0; r < 10; r++)
         {
-            test(path[i], size[i], dimension[i], amOutputs[i], j + 10*i, depth[i]);
+            test("test/"+file_names[i], parameter_counts[i],to_string(i)+to_string(r));
         }
     }
+    }
+    catch(exception& e)
+    {
+        cout << e.what() << endl;
+    }
+
+
+
 
     cout << "Good";
 

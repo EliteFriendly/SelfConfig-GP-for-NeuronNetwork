@@ -9,6 +9,11 @@ void AdaptiveGeneticProgramming::findBest(double **x)
             bestIndividual = arrayIndividuals[i];
         }
     }
+    if (saveTrail) {
+        
+        fileTrail << bestIndividual.getFitness() << endl;
+        
+    }
 }
 
 void AdaptiveGeneticProgramming::setSelectionsArrays()
@@ -175,10 +180,10 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
                                             int numGeneration)
 {
 
-    fSel.open("algorithm_results/Probabilities/ProbabilSel_" + to_string(numberFile) + ".txt");
+    fSel.open("algorithm_results/Probabilities/ProbabilSel_" + markFile + ".txt");
 
-    fCross.open("algorithm_results/Probabilities/ProbabilCross_" + to_string(numberFile) + ".txt");
-    fMut.open("algorithm_results/Probabilities/ProbabilMut_" + to_string(numberFile) + ".txt");
+    fCross.open("algorithm_results/Probabilities/ProbabilCross_" + markFile + ".txt");
+    fMut.open("algorithm_results/Probabilities/ProbabilMut_" + markFile + ".txt");
 
     saveProbabilities();
 
