@@ -36,7 +36,16 @@ void Tree::calcFitness(double **x, int size) // typeTask = "reg" or "class"
             for (int j = 0; j < ammOutputs; j++)
                 RMSE += pow(res[j] - x[i][ammInputs + j], 2); // Считаем MSE
             delete[] res;
+            if (std::isinf(RMSE)) {
+                fitness = 0;
+                return;
+            }
         }
+        if (std::isnan(RMSE)) {
+                fitness = 0;
+                return;
+        }
+
         RMSE = sqrt(RMSE / (ammOutputs * size));                  // Считаем RMSE
         fitness = 1 / (1 + ef * RMSE + nf * numNodes / maxNodes); // Считаем фитнес, где ef - коэффициент при RMSE, nf
                                                                   // - коэффициент при количестве узлов, maxNodes -
@@ -177,7 +186,7 @@ Tree::Tree(int d, int ammInput, bool inputBranch) : inputBranch(inputBranch), am
     }
     else
     {
-        numberFunc = gen()% 3;
+        numberFunc = gen() % 3;
         if (numberFunc == 2)
         {
             unarFuncUs = true;
@@ -268,6 +277,7 @@ void Tree::doHiddenNeuron()
     right->doHiddenNeuron();
     if (numberFunc == 0)
     { // Случай сложения узлов
+        //cout<<"add"<<endl;
         ammLayers = max(left->ammLayers ,
             right->ammLayers); // Ищем максимальное количество слоев
         int minLayers = min(left->ammLayers , right->ammLayers);
@@ -369,6 +379,7 @@ void Tree::doHiddenNeuron()
     if (numberFunc == 1)
     {                     // Случай если обьединение
         int ammLeftN = 0; // Количество нейронов слева
+        //cout<<"con"<<endl;
         ammLayers = left->ammLayers + right->ammLayers;
         ammNeuron = new int[ammLayers];
         for (int i = 0; i < left->ammLayers; i++)
@@ -382,6 +393,7 @@ void Tree::doHiddenNeuron()
         int* coordXOutput = new int[ammLeftN];
         int* coordYOutput = new int[ammLeftN];
         int i1 = 0; // Количество нейронов где нет выхода
+        //cout << "con1" << endl;
         for (int i = 0; i < ammLayers; i++)
         {
             network[i] = new Neuron[ammNeuron[i]];
@@ -417,11 +429,13 @@ void Tree::doHiddenNeuron()
                 }
             }
         }
+        //cout << "con end" << endl;
         delete[] coordXOutput;
         delete[] coordYOutput;
     }
     if (numberFunc == 2)
     {//Случай реккурсивной связи (унарная функция только с правой веткой работает)
+        //cout<<"start"<<endl;
         int maxAmmNeuron = 0;
         ammLayers = right->ammLayers;
         ammNeuron = new int[ammLayers];
@@ -429,6 +443,9 @@ void Tree::doHiddenNeuron()
         {
             ammNeuron[i] = right->ammNeuron[i];
             maxAmmNeuron = max(maxAmmNeuron , ammNeuron[i]);
+        }
+        if (left!= nullptr) {
+            throw logic_error("Left not nullptr");
         }
         network = new Neuron * [ammLayers];
         //For neurons without output
@@ -443,6 +460,7 @@ void Tree::doHiddenNeuron()
 
         int iInput = 0;//количество нейронов у которых нет входа
         int iOutput = 0;//количество нейронов у которых нет выхода
+        //cout<<"start2"<<endl;
         for (int i = 0; i < ammLayers; i++)
         {
             network[i] = new Neuron[ammNeuron[i]];
@@ -480,6 +498,7 @@ void Tree::doHiddenNeuron()
         if (coordRNN_firstL != nullptr) {
 
             if (amRNN != iOutput) {//Делаем надбавку/убавку
+                //cout<<"add/remove"<<endl;
                 int** tmp = new int* [2];
                 tmp[0] = new int[amRNN];
                 tmp[1] = new int[amRNN];
@@ -503,7 +522,7 @@ void Tree::doHiddenNeuron()
                 delete[] tmp;
                 amRNN = iOutput;
             }
-
+            //cout<<"check"<<endl;
             flag = new bool[iOutput];//Найдется ли пара в новой сети для наследования от старой
             for (int i = 0;i < amRNN;i++) {
                 flag[i] = false;
@@ -518,12 +537,13 @@ void Tree::doHiddenNeuron()
                 }
 
             }
-
+            //cout<<"end check"<<endl;
 
 
         }
         else {
             amRNN = iOutput;
+            //cout<<"RNN: "<<amRNN<<endl;
             flag = new bool[amRNN];
             coordRNN_firstL = new int* [2];
             coordRNN_firstL[0] = new int[amRNN];
@@ -541,16 +561,17 @@ void Tree::doHiddenNeuron()
                 random = gen() % iInput;
                 coordRNN_firstL[0][i] = coordXInput[random];
                 coordRNN_firstL[1][i] = coordYInput[random];
-                
+                //cout<< coordRNN_firstL[0][i] << " " << coordRNN_firstL[1][i] << endl;
             }
             network[coordRNN_firstL[0][i]][coordRNN_firstL[1][i]].addConnectRNN(coordXOutput[i], coordYOutput[i], coordRNN_firstL[0][i], coordRNN_firstL[1][i]);
         }
-
+        
         delete[] coordXOutput;
         delete[] coordYOutput;
         delete[] coordXInput;
         delete[] coordYInput;
         delete[] flag;
+        //cout<<"end delete"<<endl;
     }
 
 }
@@ -725,7 +746,7 @@ void Tree::trainWithDE(SampleStorage &data, int size, ComputingLimitation &cLimi
     for (int i = 1; i < ammLayers; i++)
         for (int j = 0; j < ammNeuron[i]; j++)
         {
-            if (network[i][j].getAmountInp() != 0)
+            if (network[i][j].getAmountInp() != 0 or network[i][j].getAmountInpRNN() != 0)
                 amWeights += network[i][j].getAmountInp() + 1 + network[i][j].getAmountInpRNN();
         }
     for (int i = 0; i < ammOutputs; i++)

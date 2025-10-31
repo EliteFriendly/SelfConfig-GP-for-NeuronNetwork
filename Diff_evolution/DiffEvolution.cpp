@@ -106,6 +106,9 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
 
     saveBest();
     bestPation = best;
+    if (best.getFitness() < 0) {
+        cout << "Blya";
+    }
     trackBest[0] = best.getFitness();
     // bestPation = best;
     if (cl.getComputingLimitation() == 0)

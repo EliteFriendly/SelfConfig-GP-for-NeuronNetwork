@@ -215,7 +215,11 @@ class AdaptiveGeneticProgramming
     {
         markFile = special;
         AdaptiveGeneticProgramming::saveTrail = saveTrail;
-        fileTrail.open("Best/" + markFile + ".txt");
+        fileTrail.open("algorithm_results/trail/" + markFile + ".txt");
+        if (!fileTrail.is_open())
+        {
+            throw "Error: can't open file for trail";
+        }
     }
     void saveBestIndividualtoFile()
     {

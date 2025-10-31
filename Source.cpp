@@ -106,11 +106,12 @@ void test(string path, int dim, string mark)
         for (int j = 0; j < dim+1; j++)
         {
             file >> data[i][j];
+            //cout<<data[i][j]<<" ";
             if (file.peek() == ',')
                 file.ignore();
             // cout << data[i][j] << " ";
         }
-
+        //cout << endl;
 
         // cout << endl;
     }
@@ -135,14 +136,14 @@ void test(string path, int dim, string mark)
     cout << "Iteration " << mark << endl;
     AdaptiveGeneticProgramming proba(treeDepth, "reg");
     proba.numFileAndTrail(mark,true);
-    proba.startTrain(data, dim, 1, DATA_SIZE,10,10);
+    proba.startTrain(data, dim, 1, DATA_SIZE,11,11);
     Tree best = proba.getBest();
     // fileOut << proba.getError(dataTest, size * 0.25) << endl;
     fileOut << best.getFunc() << endl;
     fileOut << best.getMatrix() << endl;
     fileOut.close();
     for (int i = 0;i < storage.getTestSize();i++) {
-        filePoints << storage.getTestData()[i][dim] << " " << best.getValue(storage.getTestData()[i]) << endl;
+        filePoints << storage.getTestData()[i][dim] << " " << best.getValue(storage.getTestData()[i])[0] << endl;
     }
     filePoints.close();
 }
@@ -153,26 +154,34 @@ int main()
     clock_t tStart = clock();
 
     std::vector<std::string> file_names = {
-    "I_6_20b.txt",
-    "I_8_14.txt", 
-    "I_12_2.txt",
-    "I_14_3.txt",
-    "I_14_4.txt",
-    "I_15_3x.txt",
-    "I_15_10.txt",
-    "I_18_4.txt",
+        "I_6_2b.txt",
+        "I_8_14.txt", 
+        "I_12_1.txt",
+        "I_12_2.txt",
+        "I_12_4.txt",
+        "I_14_3.txt",
+        "I_14_4.txt",
+        "I_15_3x.txt",
+        "I_15_10.txt",
+        "I_18_4.txt",
+        "I_24_6.txt",
+        "I_32_5.txt"
     };
 
 // Массив количества изменяемых параметров для каждой задачи
     std::vector<int> parameter_counts = {
-    2,  // I.6.20b: theta, t
-    4,  // I.8.14: x1, y1, x2, y2
-    4,  // I.12.2: q, E, v, B
-    2,  // I.14.3: m, h
-    2,  // I.14.4: k, x
-    3,  // I.15.3x: x1, u, t
-    2,  // I.15.10: m, v
-    4,  // I.18.4: m, v, r, theta
+        3,  // I.6.2b: 
+        4,  // I.8.14: x1, y1, x2, y2
+        2,  // I.12.1: q1, q2, r
+        4,  // I.12.2: q, E, v, B
+        3,  // I.12.4: mu, r
+        3,  // I.14.3: m, h
+        2,  // I.14.4: k, x
+        4,  // I.15.3x: x1, u, t
+        3,  // I.15.10: m, v
+        4,  // I.18.4: m, v, r, theta
+        4,  // I.24.6: n, theta2
+        4   // I.32.5: q, a
     };
     string st = "test/" + file_names[0];
     //cout << st << endl;
@@ -185,13 +194,38 @@ int main()
     
 
 
-        // cout << endl;
+    // cout << endl;
+    int l = 8;
+    double* coef = new double[l];
+    for (int i = 0; i < l; i++)
+    {
+        coef[i] = 1;
+    }
+    /*Tree proba(3 , 2 , 1 , "reg");
+    proba.doNeuronNetwork();
+    proba.changeCoef(coef);
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getValue(coef)[0] << endl;
+    cout << proba.getFunc() << endl;
+    cout << proba.getMatrix() << endl;*/
+
+
+    try {
     for (int i = 0;i < file_names.size();i++) {
         for (int r = 0; r < 10; r++)
         {
             test("test/"+file_names[i], parameter_counts[i],to_string(i)+to_string(r));
         }
     }
+    }
+    catch(exception& e)
+    {
+        cout << e.what() << endl;
+    }
+
 
 
 

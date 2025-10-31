@@ -12,6 +12,7 @@ void AdaptiveGeneticProgramming::findBest()
     if (saveTrail) {
         
         fileTrail << bestIndividual.getFitness() << endl;
+        
     }
     
 }
@@ -53,6 +54,7 @@ void AdaptiveGeneticProgramming::threadsFitnessCalc(SampleStorage &data, int amm
     {
         for (int i = 0; i < numIndividuals; i++)
         {
+            cout << "Individual\t" << i << endl;
             arrayChildren[i].doNeuronNetwork();
             arrayChildren[i].trainWithDE(data, size, computingLimitation);
         }
@@ -227,6 +229,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
     // Основное начало алгоритма
     int numParent1, numParent2;
     int maxGeneration = 0;
+    //return;//#
     for (int i = 0; computingLimitation.getComputingLimitation() > 0; i++)
     {
         // cout << "Номер генерации = " << i << endl;
