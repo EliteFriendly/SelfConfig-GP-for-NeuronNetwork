@@ -589,7 +589,7 @@ void Tree::trainWithDE(double **x, int size)
             limits[i] = -30;
 
     DiffEvolution DE(func, limits, amCoefficients, "targetToBest1", "max");
-    DE.startSearch(0.01, 0.5, 0.5, 11, 11);
+    DE.startSearch(0.01, 0.5, 0.5, 30, 30);
     int i = 0;
     double *coef = DE.getBestCoordinates();
     changeCoef(coef);

@@ -135,7 +135,7 @@ void test(string path, int dim, string mark)
     cout << "Iteration " << mark << endl;
     AdaptiveGeneticProgramming proba(treeDepth, "reg");
     proba.numFileAndTrail(mark,true);
-    proba.startTrain(data, dim, 1, DATA_SIZE,11,11);
+    proba.startTrain(storage.getTrainData(), dim, 1, storage.getTrainSize(),10,10);
     Tree best = proba.getBest();
     // fileOut << proba.getError(dataTest, size * 0.25) << endl;
     fileOut << best.getFunc() << endl;

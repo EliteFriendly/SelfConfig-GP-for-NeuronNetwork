@@ -218,7 +218,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
     // Основное начало алгоритма
     int numParent1, numParent2;
 
-    for (int i = 0; i < numGeneration; i++)
+    for (int i = 0; i < numGeneration - 1; i++)
     {
         // cout << "Номер генерации = " << i << endl;
         setSelectionsArrays();
