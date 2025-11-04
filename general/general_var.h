@@ -87,5 +87,5 @@ static function<double(double)> funcActivation[16] = {
 
 
 //for DE
-static const int numInd = 12;
-static const int numGen = 12;
+static const int numInd = 30;
+static const int numGen = 30;

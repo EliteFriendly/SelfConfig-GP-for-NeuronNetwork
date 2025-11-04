@@ -52,14 +52,15 @@ void DiffEvolution::saveBest()
 
 bool DiffEvolution::networkQualityCheck(int generation)
 {
-    if (generation < round(generations * rejectionRate))
-        return true;
+    //if (generation < round(generations * rejectionRate))
+      //  return true;
     for (int i = generation; i > generation - round(generations * rejectionRate) + 1; i--)
     {
-        if (trackBest[i] > trackBest[i - 1])
-            return true;
+        //if (trackBest[i] > trackBest[i - 1])
+            //return true;
     }
-    return false;
+    return true;
+    //return false;
 }
 
 bool DiffEvolution::overFittingCheck()
@@ -79,7 +80,7 @@ bool DiffEvolution::overFittingCheck()
     {
         // cout<<"Overfitted"<<endl;
         best = bestPation; // Return to best individual before overfitting
-        return true;       // Overfitted
+        //return true;       // Overfitted
     }
     return false;
 }

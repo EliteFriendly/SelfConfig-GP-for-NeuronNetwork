@@ -242,7 +242,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
             // arrayChildren[j].trainWithDE(x, y, size, K1);
         }
         cout << "Generation " << i << endl;
-        threadsFitnessCalc(sampleStorage, 12);
+        threadsFitnessCalc(sampleStorage, 6);
         // cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;
         recalcProbabilities();
 
