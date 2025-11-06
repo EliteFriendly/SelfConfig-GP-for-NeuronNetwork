@@ -136,7 +136,7 @@ void test(string path, int dim, string mark)
     cout << "Iteration " << mark << endl;
     AdaptiveGeneticProgramming proba(treeDepth, "reg");
     proba.numFileAndTrail(mark,true);
-    proba.startTrain(data, dim, 1, DATA_SIZE,10,10);
+    proba.startTrain(data, dim, 1, DATA_SIZE,30,30);
     Tree best = proba.getBest();
     // fileOut << proba.getError(dataTest, size * 0.25) << endl;
     fileOut << best.getFunc() << endl;
@@ -165,7 +165,7 @@ int main()
         "I_15_10.txt",
         "I_18_4.txt",
         "I_24_6.txt",
-        "I_32_5.txt"
+        "I_34_8.txt"
     };
 
 // Массив количества изменяемых параметров для каждой задачи
@@ -181,7 +181,7 @@ int main()
         3,  // I.15.10: m, v
         4,  // I.18.4: m, v, r, theta
         4,  // I.24.6: n, theta2
-        4   // I.32.5: q, a
+        4   // I.34.8: q, a
     };
     string st = "test/" + file_names[0];
     //cout << st << endl;
@@ -214,7 +214,7 @@ int main()
 
 
     try {
-    for (int i = 0;i < file_names.size();i++) {
+    for (int i = 11;i < file_names.size();i++) {
         for (int r = 0; r < 10; r++)
         {
             test("test/"+file_names[i], parameter_counts[i],to_string(i)+to_string(r));

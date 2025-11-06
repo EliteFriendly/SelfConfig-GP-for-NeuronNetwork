@@ -25,11 +25,12 @@ class DiffEvolution
     IndividualDiffEvolution *arrIndividuals; // Вектор содержащий целевые вектора
     IndividualDiffEvolution best;            // Лучшее найденное решение
     IndividualDiffEvolution bestPation;      // Best solution before overfitting
-    double *trackBest;                       // Отслеживание лучшего решения
-    double rejectionRate = 0.35;              // Part of all generation, which not improve the quality of solution
+    double* trackBest;                       // Отслеживание лучшего решения
+    double* trackValidationFitness;            // Отслеживание валидационной ошибки
+    double rejectionRate = 0.3;              // Part of all generation, which not improve the quality of solution
 
-    int maxPartPatience = 0.3; // Part of all generation, before overfitting
-    int currentPatience = 0;
+    double maxPartPatience = 0.15; // Part of all generation, before overfitting
+    //int currentPatience = 0;
 
     int ammDimens;                     // Количество измерений(осей)
     double *limitsDimension = nullptr; // Ограничения каждой оси
@@ -43,7 +44,7 @@ class DiffEvolution
     void saveBest();
 
     bool networkQualityCheck(int generation); // This function reject the bad neural network to save recources
-    bool overFittingCheck();                  // This function reject the bad neural network to save recources
+    bool overFittingCheck(int generation);                  // This function reject the bad neural network to save recources
 
   public:
     DiffEvolution(function<double(double *)> func, double *limitsDimension, int ammDimens, string typeMut, string aim)
@@ -98,6 +99,10 @@ class DiffEvolution
         {
             delete[] trackBest;
             trackBest = nullptr;
+        }
+        if (trackValidationFitness != nullptr) {
+            delete[] trackValidationFitness;
+            trackValidationFitness = nullptr;
         }
     }
 };

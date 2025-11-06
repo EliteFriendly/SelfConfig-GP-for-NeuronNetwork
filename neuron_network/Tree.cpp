@@ -29,15 +29,19 @@ void Tree::calcFitness(double **x, int size) // typeTask = "reg" or "class"
     // calculated a RMSE
     if (typeTask == "reg")
     {
-        double RMSE = 0;
+        long double RMSE = 0;
         for (int i = 0; i < size; i++)
         {
             double *res = getValue(x[i]); // Получаем значение нейронной сети для каждого входа
-            for (int j = 0; j < ammOutputs; j++)
-                RMSE += pow(res[j] - x[i][ammInputs + j], 2); // Считаем MSE
+            for (int j = 0; j < ammOutputs; j++) {
+                RMSE += pow(res[j] - x[i][ammInputs + j] , 2); // Считаем MSE
+                
+            }
+
             delete[] res;
             if (std::isinf(RMSE)) {
                 fitness = 0;
+                
                 return;
             }
         }
