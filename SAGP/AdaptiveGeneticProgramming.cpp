@@ -205,8 +205,8 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
     // Set limitations
     if (computingLimitation.getComputingLimitation() == 0)
     {
-        int DEind = 11;
-        int DEgen = 11;
+        int DEind = 30;
+        int DEgen = 30;
         computingLimitation.setComputingLimitation(DEind * DEgen * numIndividuals * numGeneration);
     }
     cout << "Computing limitation = " << computingLimitation.getComputingLimitation() << endl;

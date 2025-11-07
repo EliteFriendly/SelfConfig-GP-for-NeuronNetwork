@@ -52,20 +52,36 @@ void DiffEvolution::saveBest()
 
 bool DiffEvolution::networkQualityCheck(int generation)
 {
-    if (generation < round(generations * rejectionRate))
+    if (generation < round(generations * rejectionRate)+1)
         return true;
-    for (int i = generation; i > generation - round(generations * rejectionRate) + 1; i--)
+    for (int i = generation; i > generation - round(generations * rejectionRate); i--)
     {
         if (trackBest[i] > trackBest[i - 1])
             return true;
     }
+    //return true;
     return false;
 }
 
-bool DiffEvolution::overFittingCheck()
+bool DiffEvolution::overFittingCheck(int generation)
 {
-    double validationError = overFittingFunc(best.getCoordinats());
-    if ((validationError / best.getFitness()) >= 0.9) // We want MAXIMAZE fitness
+    trackValidationFitness[generation] = overFittingFunc(best.getCoordinats());
+    //cout << maxPartPatience << endl;
+    if (generation < round(generations * maxPartPatience)+1) {
+        bestPation = best;
+        return false;
+    }
+    for (int i = generation; i > generation - round(generations * maxPartPatience); i--)
+    {
+        if (trackValidationFitness[i] >= trackValidationFitness[i - 1]) {
+            bestPation = best;
+            return false;
+        }
+            
+    }
+    best = bestPation;
+    return true;
+    /*if ((validationError / best.getFitness()) >= 0.9) // We want MAXIMAZE fitness
     {
         bestPation = best;
         currentPatience = 0;
@@ -81,7 +97,7 @@ bool DiffEvolution::overFittingCheck()
         best = bestPation; // Return to best individual before overfitting
         return true;       // Overfitted
     }
-    return false;
+    return false;*/
 }
 
 void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int generations, ComputingLimitation &cl)
@@ -95,6 +111,7 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
     arrIndividuals = new IndividualDiffEvolution[N];
 
     trackBest = new double[generations];
+    trackValidationFitness = new double[generations];
 
     // Генерация первой популяции
     for (int i = 0; i < N; i++)
@@ -106,7 +123,11 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
 
     saveBest();
     bestPation = best;
+    if (best.getFitness() < 0) {
+        cout << "Blya";
+    }
     trackBest[0] = best.getFitness();
+    trackValidationFitness[0] = 99999999999999999;
     // bestPation = best;
     if (cl.getComputingLimitation() == 0)
     {
@@ -129,7 +150,7 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
         saveBest();
         trackBest[i] = best.getFitness();
         if (cl.getComputingLimitation() == 0 or !networkQualityCheck(i) or
-            overFittingCheck()) // If amount of computing is over or best dont change then stop
+            overFittingCheck(i)) // If amount of computing is over or best dont change then stop
         {
             return;
         }

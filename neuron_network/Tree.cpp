@@ -606,7 +606,7 @@ void Tree::trainWithDE(SampleStorage &data, int size, ComputingLimitation &cLimi
 
     DiffEvolution DE(func, limits, amCoefficients, "targetToBest1", "max");
     DE.setOverFittingFunc(overFittingFunc);
-    DE.startSearch(0.01, 0.5, 0.5, 11, 11, cLimitation);
+    DE.startSearch(0.01, 0.5, 0.5, 30, 30, cLimitation);
     int i = 0;
     double *coef = DE.getBestCoordinates();
     changeCoef(coef);
