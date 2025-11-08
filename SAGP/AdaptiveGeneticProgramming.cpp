@@ -230,7 +230,7 @@ void AdaptiveGeneticProgramming::startTrain(double **x, int ammInputs, int amOut
             // arrayChildren[j].trainWithDE(x, y, size, K1);
         }
         cout << "Generation " << i << endl;
-        threadsFitnessCalc(x, 12);
+        threadsFitnessCalc(x, 6);
         recalcProbabilities();
 
         forming.replaceGeneration(arrayIndividuals, arrayChildren, numIndividuals);
